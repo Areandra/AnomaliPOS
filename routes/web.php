@@ -107,3 +107,32 @@ Route::post('/reset-pin', function (Request $request) {
     // Dummy: langsung sukses
     return response()->json(['status' => 'ok']);
 });
+
+Route::get('/users', function () {
+    return view('users.index');
+})->name('users.index');
+
+Route::get('/users/create', function () {
+    return view('users.create');
+})->name('users.create');
+
+Route::post('/users', function (Request $request) {
+    return redirect()->route('users.create');
+})->name('users.store');
+
+Route::put('/users/{id}', function (Request $request, $id) {
+    return redirect()->route('users.create');
+})->name('users.update');
+
+Route::get('/users/{id}/edit', function ($id) {
+    //dummy data user
+    $user = (object) [
+        'id' => $id,
+        'name' => 'Dion Anugrah',
+        'email' => 'dion@untad.com',
+        'role' => 'admin',
+        'avatarUrl' => ''
+    ];
+
+    return view('users.create', compact('user'));
+})->name('users.edit');
