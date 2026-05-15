@@ -160,7 +160,6 @@ class AuthController extends Controller
         $deviceFingerprint = $request->cookie('device_fingerprint');
 
         if (!$deviceFingerprint) {
-
             return response()->json([
                 'message' => 'Credentials tidak valid',
                 'code' => 'invalid_fp'
@@ -173,7 +172,6 @@ class AuthController extends Controller
             ->exists();
 
         if (!$isTrusted) {
-
             return response()->json([
                 'message' => 'Device Tidak Dikenali',
                 'code' => 'not_trusted'

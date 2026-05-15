@@ -69,7 +69,7 @@ class OrderController extends Controller
     }
 
     // POST /api/order
-    public function store(Request $request): JsonResponse|\Illuminate\Http\RedirectResponse
+    public function store(Request $request): JsonResponse
     {
         $restaurantId = session('restaurant_id');
         $plan         = session('restaurant_plan', 'starter');
@@ -145,7 +145,7 @@ class OrderController extends Controller
             ]);
         }
 
-        return redirect('/cashier');
+        return response()->json(['redirect' => '/cashier']);
     }
 
     // POST /api/order/add-item

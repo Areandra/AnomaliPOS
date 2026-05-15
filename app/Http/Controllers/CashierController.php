@@ -18,8 +18,8 @@ class CashierController extends Controller
 
     $orders = $plan !== 'starter'
       ? Order::with(['payment', 'table'])
-      ->whereHas('session', fn($q) => $q->where('is_active', 1))
-      ->with('session')
+      ->whereHas('tableSession', fn($q) => $q->where('is_active', 1))
+      ->with('tableSession')
       ->where('restaurant_id', session('restaurant_id'))
       ->get()
       : Order::whereDoesntHave('payment')

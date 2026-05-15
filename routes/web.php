@@ -7,6 +7,7 @@ use App\Http\Controllers\CashierController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\DashboardController;
 
 // ========================================================================
 // REGISTER
@@ -30,10 +31,12 @@ Route::get('/account-activation', [
     ->name('account-activation')
     ->middleware('signed');
 
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index']);
+
 // ========================================================================
 // CASHIER ROUTES
 // ========================================================================
-
 
 Route::get('/cashier', [CashierController::class, 'index'])
     ->name('cashier.index');

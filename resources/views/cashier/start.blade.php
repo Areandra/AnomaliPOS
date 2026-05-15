@@ -292,7 +292,10 @@ function selectTableApp(tablesData, currentShift) {
                     type: this.orderType,
                 })
             });
-            if (res.ok || res.redirected) {
+            const data = await res.json();
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            } else if (res.ok) {
                 window.location.href = '/cashier';
             }
         },
@@ -311,7 +314,10 @@ function selectTableApp(tablesData, currentShift) {
                     type: this.orderType,
                 })
             });
-            if (res.ok || res.redirected) {
+            const data = await res.json();
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            } else if (res.ok) {
                 window.location.href = '/cashier';
             }
         },
