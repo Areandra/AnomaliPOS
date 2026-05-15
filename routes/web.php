@@ -72,127 +72,35 @@ Route::prefix('login/restaurant-pin')
     ])
     ->group(function () {
 
-        Route::view('/', 'auth.restaurant-pin');
-
-        Route::post('/', [
-            AuthController::class,
-            'restaurantPin'
-        ]);
-    });
-
-// ========================================================================
-// LOGOUT
-// ========================================================================
-
-Route::post('/sign-out', [
-    AuthController::class,
-    'logout'
-])->middleware([
-    'auth',
-    'auth.restaurant'
-]);
-
-// ========================================================================
-// CHANGE PIN
-// ========================================================================
-
-Route::middleware('auth.restaurant')
-    ->group(function () {
-
-        Route::post('/request-change-pin', [
-            AuthController::class,
-            'requestToChangePin'
-        ]);
-    });
-
-Route::get('/change-restaurant-pin/{restaurantId}', [
-    AuthController::class,
-    'showChangePin'
-])
-    ->name('change-restaurant-pin')
-    ->middleware('signed');
-
-Route::post('/change-restaurant-pin/{restaurantId}', [
-    AuthController::class,
-    'updatePin'
-]);
-
-// ========================================================================
-// CHANGE PASSWORD
-// ========================================================================
-
-Route::prefix('request-change-password')->group(function () {
-
-    Route::get('/', function () {
-        return view('auth.request-reset-password-form');
-    })->name('request-change-password-form');
-
-    Route::post('/', [
-        AuthController::class,
-        'requestToChangePassword'
-    ])->name('request-change-password');
+    // Dummy: langsung sukses
+    return response()->json(['status' => 'ok']);
 });
 
-Route::get('/change-password/{userId}', [
-    AuthController::class,
-    'showChangePassword'
-])
-    ->name('change-password')
-    ->middleware('signed');
+Route::get('/users', function () {
+    return view('users.index');
+})->name('users.index');
 
-Route::post('/change-password/{userId}', [
-    AuthController::class,
-    'updatePassword'
-]);
+Route::get('/users/create', function () {
+    return view('users.create');
+})->name('users.create');
 
-// ========================================================================
-// USER MANAGEMENT
-// ========================================================================
+Route::post('/users', function (Request $request) {
+    return redirect()->route('users.create');
+})->name('users.store');
 
-Route::middleware([
-    'auth',
-    'auth.restaurant',
-])
-    ->group(function () {
+Route::put('/users/{id}', function (Request $request, $id) {
+    return redirect()->route('users.create');
+})->name('users.update');
 
-        Route::get('/users', [
-            UserController::class,
-            'index'
-        ])->name('users.index');
+Route::get('/users/{id}/edit', function ($id) {
+    //dummy data user
+    $user = (object) [
+        'id' => $id,
+        'name' => 'Dion Anugrah',
+        'email' => 'dion@untad.com',
+        'role' => 'admin',
+        'avatarUrl' => ''
+    ];
 
-        Route::get('/users/create', [
-            UserController::class,
-            'show'
-        ])->defaults('id', 'create')
-            ->name('users.create');
-
-        Route::post('/users', [
-            UserController::class,
-            'store'
-        ])->name('users.store');
-
-        Route::get('/users/{id}/edit', [
-            UserController::class,
-            'show'
-        ])->name('users.edit');
-
-        Route::put('/users/{id}', [
-            UserController::class,
-            'update'
-        ])->name('users.update');
-
-        Route::delete('/users/{id}', [
-            UserController::class,
-            'destroy'
-        ])->name('users.destroy');
-
-        Route::post('/users/{id}/toggle-status', [
-            UserController::class,
-            'toggleStatus'
-        ])->name('users.toggle-status');
-
-        Route::put('/users/{id}/password', [
-            UserController::class,
-            'updatePassword'
-        ])->name('users.update-password');
-    });
+    return view('users.create', compact('user'));
+})->name('users.edit');

@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Restaurant extends Authenticatable
 {
+    use HasFactory;
     protected $fillable = [
         'restaurant_uid',
         'name',
