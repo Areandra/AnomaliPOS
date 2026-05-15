@@ -8,7 +8,7 @@
     // DUMMY DATA SEEDING (Sesuai Permintaan)
     // ==========================================
     $atLeastPro = true; // Ubah ke 'false' untuk melihat banner promo di bawah
-    $currentUrl = '/dashboard'; // URL aktif saat ini untuk state menu
+    $currentUrl = '/users'; // URL aktif saat ini untuk state menu
 
     // 1. Data Main Menu
     $mainMenuItems = [

@@ -177,18 +177,16 @@
                 toggleTheme() {
                     this.isDark = !this.isDark;
                     localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
-                    this.updateRootTheme();
+                    window.dispatchEvent(new Event('toggle-theme'));
                 },
 
                 updateRootTheme() {
-                    document.documentElement.classList.toggle('dark', this.isDark);
-                    document.documentElement.dataset.theme = this.isDark ? 'dark' : 'light';
+                    // tidak dipakai lagi, sinkronisasi lewat adminLayoutData
                 },
 
                 init() {
                     const storedTheme = localStorage.getItem('theme');
                     this.isDark = storedTheme === 'dark';
-                    this.updateRootTheme();
                 },
 
                 toggleStatus(id) {

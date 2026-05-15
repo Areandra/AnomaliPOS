@@ -504,7 +504,7 @@ class AuthController extends Controller
         }
 
         $restaurant = Restaurant::query()->where('id', $user->restaurant_id)
-            ->select('id', 'restaurant_uid', 'pin')
+            ->select('id', 'restaurant_uid', 'pin', 'plan')
             ->first();
 
         if (!$restaurant) {
@@ -520,6 +520,8 @@ class AuthController extends Controller
         Auth::guard('restaurant')->login($restaurant);
 
         $request->session()->put('auth_uid', $restaurant->restaurant_uid);
+        $request->session()->put('restaurant_id', $restaurant->id);
+        $request->session()->put('restaurant_plan', $restaurant->plan);
 
         // Arahkan ke rute berdasarkan role user saat ini
         $redirectUrl = match ($user->role) {
