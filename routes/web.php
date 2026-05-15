@@ -146,6 +146,33 @@ Route::get('/device-verification-failed', function () {
     ]);
 });
 // ─── MENU ─────────────────────────────────────────────────────
+// Route::group(['prefix' => 'menu'], function () {
+//     // Halaman Index (index.tsx)
+//     Route::get('/', function () {
+//         $categories = collect([
+//             ['id' => 1, 'name' => 'Main Course', 'sortOrder' => 1],
+//             ['id' => 2, 'name' => 'Beverages', 'sortOrder' => 2],
+//             ['id' => 3, 'name' => 'Desserts', 'sortOrder' => 3],
+//         ]);
+
+//         $menuItems = collect([
+//             ['id' => 1, 'categoryId' => 1, 'name' => 'Signature Wagyu Burger', 'price' => 85000, 'sku' => 'WG-001', 'isAvailable' => true, 'imageUrl' => null],
+//             ['id' => 2, 'categoryId' => 2, 'name' => 'Iced Matcha Latte', 'price' => 35000, 'sku' => 'BV-002', 'isAvailable' => true, 'imageUrl' => null],
+//             ['id' => 3, 'categoryId' => 1, 'name' => 'Chicken Teriyaki', 'price' => 55000, 'sku' => 'CH-005', 'isAvailable' => false, 'imageUrl' => null],
+//         ]);
+
+//         return view('menu.index', compact('categories', 'menuItems'));
+//     });
+
+//     // Halaman Create (create.tsx)
+//     Route::get('/menu/create', function () {
+//         $categories = [
+//             ['id' => 1, 'name' => 'Main Course'],
+//             ['id' => 2, 'name' => 'Beverages']
+//         ];
+//         return view('menu.create', ['categoryOptions' => $categories]);
+//     });
+// });
 Route::get('/menu', function () {
     return view('menu.index', [
         'menuItems'  => [],
@@ -258,4 +285,130 @@ Route::get('/shift/{id}', function ($id) {
             'payments'        => [],
         ]
     ]);
+});
+
+Route::get('/me', function () {
+    $user = (object)[
+        'id' => 61,
+        'name' => 'Adnan Mufti Maulana',
+        'email' => 'adnan@example.com',
+        'role' => 'admin',
+        'avatarUrl' => null,
+        'status' => 'active',
+        'createdAt' => '2024-09-01'
+    ];
+
+    $shifts = collect([
+        (object)['cashVariance' => 0],
+        (object)['cashVariance' => 1000],
+        (object)['cashVariance' => -500],
+    ]);
+
+    return view('me', compact('user', 'shifts'));
+});
+
+
+// Route::get('/kitchen/kot', function () {
+//     return view('kitchen.index', [
+//         'currentShift' => [
+//             'id'        => 1,
+//             'modalAwal' => 500000,
+//             'user'      => ['name' => 'Budi Santoso', 'role' => 'Kasir', 'avatarUrl' => null],
+//         ],
+//         'kotsData' => [
+//             [
+//                 'id'        => 101,
+//                 'status'    => 'sent',
+//                 'createdAt' => now()->toJSON(), // ← fix di sini
+//                 'order'     => [
+//                     'id'     => 1,
+//                     'status' => 'pending',
+//                     'table'  => ['tableNumber' => 'A1'],
+//                 ],
+//                 'orderItem' => [
+//                     'id'       => 201,
+//                     'status'   => 'cooking',
+//                     'quantity' => 2,
+//                     'notes'    => 'Tidak pakai bawang. Extra pedas',
+//                     'menuItem' => [
+//                         'name'     => 'Nasi Goreng Spesial',
+//                         'category' => ['id' => 1, 'name' => 'Makanan'],
+//                     ],
+//                 ],
+//             ],
+//             [
+//                 'id'        => 102,
+//                 'status'    => 'done',
+//                 'createdAt' => now()->toJSON(), // ← fix di sini
+//                 'order'     => [
+//                     'id'     => 2,
+//                     'status' => 'served',
+//                     'table'  => ['tableNumber' => 'B2'],
+//                 ],
+//                 'orderItem' => [
+//                     'id'       => 202,
+//                     'status'   => 'delivered',
+//                     'quantity' => 1,
+//                     'notes'    => null,
+//                     'menuItem' => [
+//                         'name'     => 'Es Teh Manis',
+//                         'category' => ['id' => 2, 'name' => 'Minuman'],
+//                     ],
+//                 ],
+//             ],
+//         ],
+//         'categoriesData' => [
+//             ['id' => 1, 'name' => 'Makanan', 'sortOrder' => 1],
+//             ['id' => 2, 'name' => 'Minuman', 'sortOrder' => 2],
+//         ],
+//     ]);
+// });
+
+// Route::post('/kitchen/order-item/{id}/status', function ($id) {
+//     // Dummy: langsung ok
+//     return response()->json(['status' => 'ok']);
+// });
+
+Route::get('/kitchen/kot', function () {
+    // Data Dummy sesuai prop React
+    $categoriesData = collect([
+        ['id' => 1, 'name' => 'Makanan', 'sortOrder' => 1],
+        ['id' => 2, 'name' => 'Minuman', 'sortOrder' => 2],
+    ]);
+
+    $kotsData = collect([
+        [
+            'id' => 101,
+            'status' => 'viewed',
+            'createdAt' => now()->toIso8601String(),
+            'order' => [
+                'id' => 1,
+                'status' => 'pending',
+                'table' => ['tableNumber' => 'A1'],
+            ],
+            'orderItem' => [
+                'id' => 201,
+                'status' => 'cooking',
+                'quantity' => 2,
+                'notes' => 'Tidak pakai bawang. Extra pedas',
+                'menuItem' => [
+                    'name' => 'Nasi Goreng Spesial',
+                    'category' => ['id' => 1],
+                ],
+            ],
+        ],
+    ]);
+
+    $currentShift = [
+        'id' => 42,
+        'modalAwal' => 500000,
+        'user' => ['name' => 'Adnan Mufti', 'role' => 'Chef', 'avatarUrl' => null]
+    ];
+
+    return view('kitchen.index', compact('categoriesData', 'kotsData', 'currentShift'));
+});
+
+Route::post('/kitchen/order-item/{id}/status', function (Request $request, $id) {
+    // Logika update status di sini
+    return response()->json(['status' => 'success', 'new_status' => $request->status]);
 });
