@@ -8,6 +8,9 @@ use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TableController;
+use App\Http\Controllers\MenuCategoryController;
+use App\Http\Controllers\MenuItemController;
 
 // ========================================================================
 // REGISTER
@@ -33,6 +36,10 @@ Route::get('/account-activation', [
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard', [DashboardController::class, 'index']);
+
+// Redirect legacy URLs
+Route::redirect('/menu', '/menu/items');
+Route::redirect('/shift', '/shifts');
 
 // ========================================================================
 // CASHIER ROUTES
@@ -174,60 +181,106 @@ Route::prefix('request-change-password')->group(function () {
     ])->name('request-change-password');
 });
 
-Route::get('/users', function () {
-    return view('users.index');
-})->name('users.index');
+// ========================================================================
+// USER MANAGEMENT
+// ========================================================================
 
-Route::get('/users/create', function () {
-    return view('users.create');
-})->name('users.create');
+Route::middleware([
+    'auth',
+    'auth.restaurant',
+])->group(function () {
 
-Route::post('/users', function (Request $request) {
-    return redirect()->route('users.create');
-})->name('users.store');
+    Route::get('/users', [
+        UserController::class,
+        'index'
+    ])->name('users.index');
 
-Route::put('/users/{id}', function (Request $request, $id) {
-    return redirect()->route('users.create');
-})->name('users.update');
+    Route::get('/users/create', [
+        UserController::class,
+        'show'
+    ])->defaults('id', 'create')
+        ->name('users.create');
 
-Route::get('/users', [
-    UserController::class,
-    'index'
-])->name('users.index');
+    Route::post('/users', [
+        UserController::class,
+        'store'
+    ])->name('users.store');
 
-Route::get('/users/create', [
-    UserController::class,
-    'show'
-])->defaults('id', 'create')
-    ->name('users.create');
+    Route::get('/users/{id}/edit', [
+        UserController::class,
+        'show'
+    ])->name('users.edit');
 
-Route::post('/users', [
-    UserController::class,
-    'store'
-])->name('users.store');
+    Route::put('/users/{id}', [
+        UserController::class,
+        'update'
+    ])->name('users.update');
 
-Route::get('/users/{id}/edit', [
-    UserController::class,
-    'show'
-])->name('users.edit');
+    Route::delete('/users/{id}', [
+        UserController::class,
+        'destroy'
+    ])->name('users.destroy');
 
-Route::put('/users/{id}', [
-    UserController::class,
-    'update'
-])->name('users.update');
+    Route::post('/users/{id}/toggle-status', [
+        UserController::class,
+        'toggleStatus'
+    ])->name('users.toggle-status');
 
-Route::delete('/users/{id}', [
-    UserController::class,
-    'destroy'
-])->name('users.destroy');
+    Route::put('/users/{id}/password', [
+        UserController::class,
+        'updatePassword'
+    ])->name('users.update-password');
 
-Route::post('/users/{id}/toggle-status', [
-    UserController::class,
-    'toggleStatus'
-])->name('users.toggle-status');
+});
 
-Route::put('/users/{id}/password', [
-    UserController::class,
-    'updatePassword'
-])->name('users.update-password');
-    });
+// ========================================================================
+// TABLE CRUD
+// ========================================================================
+
+Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+    Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
+    Route::get('/tables/create', [TableController::class, 'create'])->name('tables.create');
+    Route::post('/tables', [TableController::class, 'store'])->name('tables.store');
+    Route::get('/tables/{id}/edit', [TableController::class, 'edit'])->name('tables.edit');
+    Route::put('/tables/{id}', [TableController::class, 'update'])->name('tables.update');
+    Route::delete('/tables/{id}', [TableController::class, 'destroy'])->name('tables.destroy');
+});
+
+// ========================================================================
+// MENU CATEGORY CRUD
+// ========================================================================
+
+Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+    Route::get('/menu/categories', [MenuCategoryController::class, 'index'])->name('menu.categories.index');
+    Route::get('/menu/categories/create', [MenuCategoryController::class, 'create'])->name('menu.categories.create');
+    Route::post('/menu/categories', [MenuCategoryController::class, 'store'])->name('menu.categories.store');
+    Route::get('/menu/categories/{id}/edit', [MenuCategoryController::class, 'edit'])->name('menu.categories.edit');
+    Route::put('/menu/categories/{id}', [MenuCategoryController::class, 'update'])->name('menu.categories.update');
+    Route::delete('/menu/categories/{id}', [MenuCategoryController::class, 'destroy'])->name('menu.categories.destroy');
+});
+
+// ========================================================================
+// MENU ITEM CRUD
+// ========================================================================
+
+Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+    Route::get('/menu/items', [MenuItemController::class, 'index'])->name('menu.items.index');
+    Route::get('/menu/items/create', [MenuItemController::class, 'create'])->name('menu.items.create');
+    Route::post('/menu/items', [MenuItemController::class, 'store'])->name('menu.items.store');
+    Route::get('/menu/items/{id}/edit', [MenuItemController::class, 'edit'])->name('menu.items.edit');
+    Route::put('/menu/items/{id}', [MenuItemController::class, 'update'])->name('menu.items.update');
+    Route::delete('/menu/items/{id}', [MenuItemController::class, 'destroy'])->name('menu.items.destroy');
+    Route::post('/menu/items/{id}/toggle-available', [MenuItemController::class, 'toggleAvailable'])->name('menu.items.toggle-available');
+});
+
+// ========================================================================
+// SHIFT CRUD
+// ========================================================================
+
+Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+    Route::get('/shifts', [ShiftController::class, 'history'])->name('shifts.index');
+    Route::get('/shifts/{id}', [ShiftController::class, 'show'])->name('shifts.show');
+    Route::delete('/shifts/{id}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
+    Route::get('/shifts/me', [ShiftController::class, 'historyMe'])->name('shifts.me');
+    Route::get('/attendance/me', [ShiftController::class, 'attendenceMe'])->name('attendance.me');
+});

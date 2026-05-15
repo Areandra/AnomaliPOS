@@ -157,28 +157,12 @@ class AuthController extends Controller
         }
 
         // Ambil fingerprint dari cookie
-        $deviceFingerprint = $request->cookie('device_fingerprint');
+        // DEVICE CHECK DINONAKTIFKAN SEMENTARA
+        // $deviceFingerprint = $request->cookie('device_fingerprint');
+        // if (!$deviceFingerprint) { ... }
+        // $isTrusted = TrustedDevice::query()...
 
-        if (!$deviceFingerprint) {
-            return response()->json([
-                'message' => 'Credentials tidak valid',
-                'code' => 'invalid_fp'
-            ], 400);
-        }
-
-        // Cek trusted device
-        $isTrusted = TrustedDevice::query()->where('user_id', $user->id)
-            ->where('device_fingerprint', $deviceFingerprint)
-            ->exists();
-
-        if (!$isTrusted) {
-            return response()->json([
-                'message' => 'Device Tidak Dikenali',
-                'code' => 'not_trusted'
-            ], 404);
-        }
-
-        // Set trusted session
+        // Set trusted session langsung
         $request->session()->put('device_trusted', true);
 
         return response()->json([
@@ -520,6 +504,7 @@ class AuthController extends Controller
         $request->session()->put('auth_uid', $restaurant->restaurant_uid);
         $request->session()->put('restaurant_id', $restaurant->id);
         $request->session()->put('restaurant_plan', $restaurant->plan);
+        $request->session()->put('plan', $restaurant->plan);
 
         // Arahkan ke rute berdasarkan role user saat ini
         $redirectUrl = match ($user->role) {

@@ -35,14 +35,14 @@
     $mainMenuItems[] = [
         'name'   => 'Menu',
         'icon'   => 'utensils',
-        'href'   => '/menu',
+        'href'   => '/menu/items',
         'active' => str_contains($currentUrl, 'menu'),
     ];
 
     $mainMenuItems[] = [
         'name'   => 'Shift',
         'icon'   => 'history',
-        'href'   => $atLeastPro ? '/shift' : '/me/history',
+        'href'   => '/shifts',
         'active' => str_contains($currentUrl, 'shift') || str_contains($currentUrl, 'history'),
     ];
 

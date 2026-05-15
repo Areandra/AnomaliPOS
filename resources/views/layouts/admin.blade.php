@@ -58,14 +58,14 @@
     $atLeastPro = in_array($plan, ['pro', 'enterprise']);
 
     $navItems = [
-        ['name' => 'Dashboard', 'icon' => 'layout-dashboard', 'href' => '/dashboard', 'active' => str_contains($currentPath, 'dashboard')],
-        ['name' => 'Menu',      'icon' => 'utensils-crossed', 'href' => '/menu',      'active' => str_contains($currentPath, 'menu')],
-        ['name' => 'Shift',     'icon' => 'history',          'href' => '/shift', 'active' => str_contains($currentPath, 'shift')],
+        ['name' => 'Dashboard', 'icon' => 'layout-dashboard', 'href' => '/dashboard',      'active' => str_contains($currentPath, 'dashboard')],
+        ['name' => 'Menu',      'icon' => 'utensils-crossed', 'href' => '/menu/items',     'active' => str_contains($currentPath, 'menu')],
+        ['name' => 'Shift',     'icon' => 'history',          'href' => '/shifts',         'active' => str_contains($currentPath, 'shift')],
     ];
     if ($atLeastPro) {
         array_splice($navItems, 1, 0, [
-            ['name' => 'Users', 'icon' => 'users', 'href' => '/users', 'active' => str_contains($currentPath, 'users')],
-            ['name' => 'Table', 'icon' => 'map',   'href' => '/table', 'active' => str_contains($currentPath, 'table')],
+            ['name' => 'Users', 'icon' => 'users', 'href' => '/users',  'active' => str_contains($currentPath, 'users')],
+            ['name' => 'Table', 'icon' => 'map',   'href' => '/tables', 'active' => str_contains($currentPath, 'table')],
         ]);
     }
 @endphp

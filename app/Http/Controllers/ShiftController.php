@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Shift;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class ShiftController extends Controller
 {
@@ -97,26 +98,30 @@ class ShiftController extends Controller
 
     public function history(): \Illuminate\View\View
     {
+        $restaurantId = Auth::guard('restaurant')->user()->id ?? null;
+
         $shifts = Shift::with('user')
+            ->when($restaurantId, fn($q) => $q->where('restaurant_id', $restaurantId))
             ->where('status', 'closed')
             ->orderBy('opened_at', 'desc')
-            ->limit(50)
-            ->get();
+            ->paginate(20);
 
-        $history = $shifts->map(fn($s) => [
-            'id'           => $s->id,
-            'user'         => ['name' => $s->user->name ?? 'Unknown'],
-            'openedAt'     => $s->opened_at,
-            'closedAt'     => $s->closed_at,
-            'startingCash' => $s->modal_awal,
-            'cashPhysical' => $s->cash_physical,
-            'cashSystem'   => $s->cash_system,
-            'selisih'      => $s->cash_variance,
-            'status'       => $s->status,
-        ]);
-
-        return view('shift/index', ['history' => $history]);
+        return view('shift.index', compact('shifts'));
     }
+
+    public function destroy(string $id): \Illuminate\Http\RedirectResponse
+    {
+        $restaurantId = Auth::guard('restaurant')->user()->id;
+
+        $shift = Shift::where('id', $id)
+            ->where('restaurant_id', $restaurantId)
+            ->firstOrFail();
+
+        $shift->delete();
+
+        return redirect()->route('shifts.index')->with('success', 'Shift berhasil dihapus.');
+    }
+
 
     public function show($id): \Illuminate\View\View
     {
