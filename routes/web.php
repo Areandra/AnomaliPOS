@@ -145,3 +145,117 @@ Route::get('/device-verification-failed', function () {
         'deviceName' => null,
     ]);
 });
+// ─── MENU ─────────────────────────────────────────────────────
+Route::get('/menu', function () {
+    return view('menu.index', [
+        'menuItems'  => [],
+        'categories' => [],
+    ]);
+});
+
+Route::get('/menu/create', function () {
+    return view('menu.create', [
+        'categoryOptions' => [],
+        'initialData'     => null,
+        'itemId'          => null,
+    ]);
+});
+
+Route::get('/menu/{id}', function ($id) {
+    return view('menu.create', [
+        'categoryOptions' => [['id' => 1, 'name' => 'Makanan'], ['id' => 2, 'name' => 'Minuman']],
+        'initialData'     => [
+            'name' => 'Dummy Item', 'categoryId' => 1, 'description' => '',
+            'price' => 10000, 'costOfGoods' => 5000, 'imageUrl' => '',
+            'isAvailable' => true, 'sku' => 'FD-001',
+        ],
+        'itemId' => $id,
+    ]);
+})->where('id', '[0-9]+');
+
+// ─── MENU CATEGORIES ──────────────────────────────────────────
+Route::get('/menu/categories/create', function () {
+    return view('menu.categories.create', [
+        'initialData' => null,
+        'categoryId'  => null,
+    ]);
+});
+
+Route::get('/menu/categories/{id}', function ($id) {
+    return view('menu.categories.create', [
+        'initialData' => ['name' => 'Dummy Category', 'description' => '', 'sortOrder' => 1],
+        'categoryId'  => $id,
+    ]);
+});
+
+// ─── SHIFT ────────────────────────────────────────────────────
+Route::get('/shift', function () {
+    return view('shift.index', [
+        'history' => [
+            [
+                'id'            => 1,
+                'user'          => ['name' => 'Budi Santoso', 'avatarUrl' => null],
+                'openedAt'      => '2026-05-15T08:00:00',
+                'closedAt'      => '2026-05-15T16:00:00',
+                'startingCash'  => 500000,
+                'cashPhysical'  => 1200000,
+                'cashExpected'  => 1250000,
+                'cashSystem'    => 750000,
+                'selisih'       => -50000,
+                'status'        => 'closed',
+            ],
+            [
+                'id'            => 2,
+                'user'          => ['name' => 'Sari Dewi', 'avatarUrl' => null],
+                'openedAt'      => '2026-05-15T16:00:00',
+                'closedAt'      => null,
+                'startingCash'  => 500000,
+                'cashPhysical'  => null,
+                'cashExpected'  => null,
+                'cashSystem'    => 300000,
+                'selisih'       => null,
+                'status'        => 'open',
+            ],
+        ]
+    ]);
+});
+
+Route::get('/me/history', function () {
+    return view('shift.me', [
+        'data' => [
+            [
+                'id'            => 1,
+                'openedAt'      => '2026-05-15T08:00:00',
+                'closedAt'      => '2026-05-15T16:00:00',
+                'startingCash'  => 500000,
+                'cashPhysical'  => 1200000,
+                'cashExpected'  => 1250000,
+                'selisih'       => -50000,
+                'status'        => 'closed',
+            ],
+        ]
+    ]);
+});
+
+Route::get('/shift/{id}', function ($id) {
+    return view('shift.show', [
+        'shift' => [
+            'id'              => $id,
+            'userId'          => 1,
+            'status'          => 'closed',
+            'modalAwal'       => 500000,
+            'openedAt'        => '2026-05-15T08:00:00',
+            'closedAt'        => '2026-05-15T16:00:00',
+            'cashSystem'      => 750000,
+            'cashPhysical'    => 1200000,
+            'cashVariance'    => -50000,
+            'qrisSystem'      => 300000,
+            'debitSystem'     => 150000,
+            'transferSystem'  => 100000,
+            'notes'           => null,
+            'user'            => ['name' => 'Budi Santoso', 'avatarUrl' => null],
+            'restaurant'      => ['name' => 'Outlet Dummy'],
+            'payments'        => [],
+        ]
+    ]);
+});
