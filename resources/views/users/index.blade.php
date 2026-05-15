@@ -157,13 +157,17 @@
                 toggleTheme() {
                     this.isDark = !this.isDark;
                     localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
-                    window.dispatchEvent(new CustomEvent('toggle-theme', { detail: { value: this.isDark, source: 'userIndex' } }));
+                    window.dispatchEvent(new Event('toggle-theme'));
                 },
+
+                updateRootTheme() {
+                    // tidak dipakai lagi, sinkronisasi lewat adminLayoutData
+                },
+
                 init() {
                     const storedTheme = localStorage.getItem('theme');
-                    if (storedTheme !== null) {
-                        this.isDark = storedTheme === 'dark';
-                    }
+                    this.isDark = storedTheme === 'dark';
+                },
 
                     window.addEventListener('toggle-theme', (event) => {
                         if (event.detail?.source !== 'userIndex') {

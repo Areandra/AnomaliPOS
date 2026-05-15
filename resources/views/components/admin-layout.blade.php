@@ -4,49 +4,46 @@
 ])
 
 @php
-    // ==========================================
-    // DUMMY DATA SEEDING (Sesuai Permintaan)
-    // ==========================================
-    $atLeastPro = true; // Ubah ke 'false' untuk melihat banner promo di bawah
-    $currentUrl = '/dashboard'; // URL aktif saat ini untuk state menu
+    $plan       = session('restaurant_plan', 'starter');
+    $atLeastPro = $plan !== 'starter';
+    $currentUrl = request()->path();
 
-    // 1. Data Main Menu
     $mainMenuItems = [
         [
-            'name' => 'Dashboard',
-            'icon' => 'layout-dashboard',
-            'href' => '/dashboard',
-            'active' => str_contains($currentUrl, '/dashboard')
+            'name'   => 'Dashboard',
+            'icon'   => 'layout-dashboard',
+            'href'   => '/dashboard',
+            'active' => $currentUrl === '/' || str_contains($currentUrl, 'dashboard'),
         ],
     ];
 
     if ($atLeastPro) {
         $mainMenuItems[] = [
-            'name' => 'Users',
-            'icon' => 'users',
-            'href' => '/users',
-            'active' => str_contains($currentUrl, '/users')
+            'name'   => 'Users',
+            'icon'   => 'users',
+            'href'   => '/users',
+            'active' => str_contains($currentUrl, 'users'),
         ];
         $mainMenuItems[] = [
-            'name' => 'Table',
-            'icon' => 'map',
-            'href' => '/table',
-            'active' => str_contains($currentUrl, '/table')
+            'name'   => 'Table',
+            'icon'   => 'map',
+            'href'   => '/table',
+            'active' => str_contains($currentUrl, 'table'),
         ];
     }
 
     $mainMenuItems[] = [
-        'name' => 'Menu',
-        'icon' => 'utensils',
-        'href' => '/menu',
-        'active' => str_contains($currentUrl, '/menu')
+        'name'   => 'Menu',
+        'icon'   => 'utensils',
+        'href'   => '/menu',
+        'active' => str_contains($currentUrl, 'menu'),
     ];
 
     $mainMenuItems[] = [
-        'name' => 'Shift',
-        'icon' => 'history',
-        'href' => $atLeastPro ? '/shift' : '/me/history',
-        'active' => str_contains($currentUrl, $atLeastPro ? '/shift' : '/history')
+        'name'   => 'Shift',
+        'icon'   => 'history',
+        'href'   => $atLeastPro ? '/shift' : '/me/history',
+        'active' => str_contains($currentUrl, 'shift') || str_contains($currentUrl, 'history'),
     ];
 
     // 2. Data Links Header
@@ -165,7 +162,7 @@
             <main class="flex-1 overflow-hidden relative">
                 <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-[size:20px_20px] opacity-40 pointer-events-none dark:hidden"></div>
                 
-                <div class="relative h-full overflow-y-auto">
+                <div class="relative h-full overflow-y-auto no-scrollbar">
                     {{ $slot }}
                 </div>
             </main>

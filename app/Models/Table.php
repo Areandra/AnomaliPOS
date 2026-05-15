@@ -36,7 +36,7 @@ class Table extends Model
 
     public function tableSessions(): HasMany
     {
-        return $this->hasMany(TableSession::class, 'current_table_session_id');
+        return $this->hasMany(TableSession::class, 'table_id');
     }
 
     public function restaurant(): BelongsTo

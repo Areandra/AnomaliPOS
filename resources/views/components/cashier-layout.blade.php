@@ -1,5 +1,7 @@
+@props(['currentShift' => null, 'pageTitle' => null])
+
 <!DOCTYPE html>
-<html lang="id" x-data="themeManager()" :class="isDark ? 'dark' : ''">
+<html lang="id" x-data="themeManager()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +18,7 @@
     <header class="fixed top-0 left-0 w-full h-16 z-50 flex items-center justify-between px-6 backdrop-blur-xl border-b duration-300"
         :class="isDark ? 'bg-slate-900/70 border-white/5' : 'bg-white/70 border-gray-200/50'">
 
-        {{-- KIRI: Logo & Nav --}}
+        {{-- KIRI --}}
         <div class="flex items-center gap-2">
             <div class="-ml-5">
                 <button onclick="window.history.back()"
@@ -34,20 +36,19 @@
                 <span class="font-black text-xl tracking-tighter uppercase" :class="isDark ? 'text-white' : 'text-slate-800'">
                     Ano<span :class="isDark ? 'text-amber-500' : 'text-orange-600'">Pos</span>
                 </span>
-                @if(isset($pageTitle))
+                @if($pageTitle)
                 <span class="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">{{ $pageTitle }}</span>
                 @endif
             </div>
         </div>
 
-        {{-- KANAN: Links + Shift Info --}}
+        {{-- KANAN --}}
         <div class="flex items-center gap-6">
             <div class="flex items-center gap-3">
-                @if(isset($headerLinks))
+                @isset($headerLinks)
                     {{ $headerLinks }}
-                @endif
+                @endisset
 
-                {{-- Fullscreen Button --}}
                 <button x-show="!isFullscreen" @click="toggleFullscreen()"
                     class="flex items-center gap-2 px-4 py-2 rounded-full duration-300 font-black text-[10px] uppercase tracking-widest shadow-sm"
                     :class="isDark ? 'bg-slate-800 text-amber-500 hover:bg-slate-700 border border-white/5' : 'bg-white text-orange-600 hover:bg-orange-50 border border-gray-200'">
@@ -56,8 +57,7 @@
                 </button>
             </div>
 
-            {{-- Shift Info --}}
-            @if(isset($currentShift) && $currentShift)
+            @if($currentShift)
                 @if($currentShift->id)
                 <div class="flex flex-col items-end pr-4 border-r" :class="isDark ? 'border-white/10' : 'border-gray-200'">
                     <div class="flex items-center gap-1.5">
@@ -98,13 +98,6 @@
         {{ $slot }}
     </main>
 
-    {{-- Plan Banner --}}
-    @php $plan = session('restaurant_plan', 'starter'); @endphp
-    @if($plan === 'starter')
-    <div class="h-12 p-4 px-2 w-full fixed bottom-0 bg-amber-500 border border-amber-500 text-center">
-        <p class="text-sm text-white">✨ <strong>Manajemen Restaurant lebih dalam?</strong> Upgrade ke Pro untuk membuka lebih banyak fitur</p>
-    </div>
-    @endif
 </div>
 
 <script>
@@ -112,10 +105,18 @@ function themeManager() {
     return {
         isDark: localStorage.getItem('theme') === 'dark',
         isFullscreen: false,
+
         toggleTheme() {
             this.isDark = !this.isDark;
             localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+            this.updateRootTheme();
         },
+
+        updateRootTheme() {
+            document.documentElement.classList.toggle('dark', this.isDark);
+            document.documentElement.dataset.theme = this.isDark ? 'dark' : 'light';
+        },
+
         toggleFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
@@ -125,7 +126,14 @@ function themeManager() {
                 this.isFullscreen = false;
             }
         },
+
         init() {
+            // Sync state awal ke DOM
+            this.updateRootTheme();
+
+            // Listen event dari child components (active-order-panel, dll)
+            window.addEventListener('toggle-theme', () => this.toggleTheme());
+
             document.addEventListener('fullscreenchange', () => {
                 this.isFullscreen = !!document.fullscreenElement;
             });
