@@ -189,31 +189,19 @@ Route::get('/menu/create', function () {
 });
 
 Route::get('/menu/{id}', function ($id) {
-    return view('menu.create', [
-        'categoryOptions' => [['id' => 1, 'name' => 'Makanan'], ['id' => 2, 'name' => 'Minuman']],
-        'initialData'     => [
-            'name' => 'Dummy Item', 'categoryId' => 1, 'description' => '',
-            'price' => 10000, 'costOfGoods' => 5000, 'imageUrl' => '',
-            'isAvailable' => true, 'sku' => 'FD-001',
-        ],
-        'itemId' => $id,
-    ]);
-})->where('id', '[0-9]+');
+    return view('menu.create');
+})->name('menu.edit');
 
 // ─── MENU CATEGORIES ──────────────────────────────────────────
+// Route untuk Create Category
 Route::get('/menu/categories/create', function () {
-    return view('menu.categories.create', [
-        'initialData' => null,
-        'categoryId'  => null,
-    ]);
-});
+    return view('menu.categories.create');
+})->name('category.create');
 
+// Route untuk Edit Category (menggunakan file yang sama)
 Route::get('/menu/categories/{id}', function ($id) {
-    return view('menu.categories.create', [
-        'initialData' => ['name' => 'Dummy Category', 'description' => '', 'sortOrder' => 1],
-        'categoryId'  => $id,
-    ]);
-});
+    return view('menu.categories.create');
+})->name('category.edit');
 
 // ─── SHIFT ────────────────────────────────────────────────────
 Route::get('/shift', function () {
