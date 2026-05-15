@@ -107,3 +107,41 @@ Route::post('/reset-pin', function (Request $request) {
     // Dummy: langsung sukses
     return response()->json(['status' => 'ok']);
 });
+
+// ─── ERROR PAGES TEST ─────────────────────────────────────────
+Route::get('/bill-closed', function () {
+    return view('errors.bill-closed', [
+        'sessionToken' => 'dummy-session-abc123',
+    ]);
+});
+
+Route::get('/forbidden', function () {
+    return view('errors.forbidden', [
+        'redirectUrl' => '/dashboard',
+    ]);
+});
+
+Route::get('/server-error', function () {
+    return view('errors.server-error');
+});
+
+Route::get('/not-found', function () {
+    return view('errors.not-found');
+});
+
+// ─── DEVICE VERIFICATION STATUS ──────────────────────────────
+Route::get('/device-verification', function () {
+    return view('auth.device-verification', [
+        'status'     => 'success',       // 'success' | 'error'
+        'message'    => 'Perangkat Anda telah berhasil diverifikasi oleh Admin.',
+        'deviceName' => 'Laptop Kasir Depan',
+    ]);
+})->name('device-verification');
+
+Route::get('/device-verification-failed', function () {
+    return view('auth.device-verification', [
+        'status'     => 'error',
+        'message'    => 'Permintaan akses perangkat Anda ditolak oleh Admin.',
+        'deviceName' => null,
+    ]);
+});

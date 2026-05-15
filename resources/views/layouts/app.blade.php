@@ -1,4 +1,3 @@
-{{-- resources/views/layouts/app.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -23,7 +22,53 @@
 </div>
 
 <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('notif', {
+            open: false,
+            type: 'success',
+            title: '',
+            message: '',
+            set(type, title, message = '') {
+                this.type    = type
+                this.title   = title
+                this.message = message
+                this.open    = true
+                setTimeout(() => this.open = false, 4000)
+            }
+        })
+
+        Alpine.store('theme', {
+            isDark: false,
+            init() {
+                const stored = localStorage.getItem('theme')
+                if (stored === 'light' || stored === 'dark') {
+                    this.isDark = stored === 'dark'
+                } else {
+                    this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+                }
+                document.documentElement.setAttribute('data-theme', this.isDark ? 'dark' : 'light')
+                // watch perubahan
+                this._watch()
+            },
+            _watch() {
+                const observer = new MutationObserver(() => {})
+                setInterval(() => {
+                    localStorage.setItem('theme', this.isDark ? 'dark' : 'light')
+                    document.documentElement.setAttribute('data-theme', this.isDark ? 'dark' : 'light')
+                }, 300)
+            },
+            toggle() {
+                this.isDark = !this.isDark
+                localStorage.setItem('theme', this.isDark ? 'dark' : 'light')
+                document.documentElement.setAttribute('data-theme', this.isDark ? 'dark' : 'light')
+            }
+        })
+    })
+</script>
+
+<script>
     lucide.createIcons();
 </script>
+
 </body>
 </html>
