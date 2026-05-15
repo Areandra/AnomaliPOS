@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('restaurants', function (Blueprint $table) {
             $table->id();
-            // $table->string('restaurant_uid')->unique();
+            $table->string('restaurant_uid')->unique();
             $table->string('name');
             $table->enum('plan', ['starter', 'pro', 'enterprise']);
             $table->string('avatar_url')->nullable();

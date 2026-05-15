@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\RestaurantContext;
+use App\Services\UserService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,6 +15,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(RestaurantContext::class, function () {
             return new RestaurantContext();
+        });
+        $this->app->scoped(UserService::class, function () {
+            return new UserService();
         });
     }
 

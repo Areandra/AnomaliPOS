@@ -17,6 +17,13 @@ class Restaurant extends Authenticatable
     ];
     protected $hidden = ['pin'];
 
+    protected function casts(): array
+    {
+        return [
+            'pin' => 'hashed',
+        ];
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
@@ -66,5 +73,4 @@ class Restaurant extends Authenticatable
     {
         return $this->hasMany(Shift::class);
     }
-
 }

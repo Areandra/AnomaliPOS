@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Restaurant;
-use App\Models\TrustedDivice;
+use App\Models\TrustedDevice;
 use App\Models\User;
 use App\Mail\SendResetPasswordMail;
 use App\Mail\SendDeviceVerificationMail;
 use App\Mail\SendNewRestaurantRegistrationRequest;
 use App\Mail\SendResetPinMail;
-use App\Services\RestaurantContext;
+// use App\Services\RestaurantContext;
+// use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,7 +35,7 @@ class AuthController extends Controller
             'restaurant_pin' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::query()->where('email', $request->email)->first();
 
         if ($user) {
             if ($user->role == 'admin' && $user->status == 'disabled') {
@@ -47,6 +48,7 @@ class AuthController extends Controller
         $newRestaurantData = [
             'name' => $validate['restaurant_name'],
             'pin' => $validate['restaurant_pin'],
+            'restaurant_uid' => (string) Str::orderedUuid(),
             'status' => 'disabled'
         ];
 
@@ -66,67 +68,54 @@ class AuthController extends Controller
         $signedUrl = URL::temporarySignedRoute(
             'account-activation',
             now()->addMinutes(5),
-            ['userId' => $newUser->id]
+            ['userId' => $newUser->id, 'restaurantId' => $restaurant->id]
         );
 
-        Mail::to(env('MAIL_FROM_ADDRESS'))->send(new SendNewRestaurantRegistrationRequest($newUser, $signedUrl));
+        Mail::to(env('MAIL_FROM_ADDRESS'))->send(new SendNewRestaurantRegistrationRequest($newUser, $restaurant, 'attempt', $signedUrl));
 
         return response()->json(['message' => 'Register Berhasil Silahkan Tunggu Akun Anda Di Aktifkan', 'code' => 'success'], 200);
     }
 
-    public function activationProgres(Request $request): View{
+    public function activationProgres(Request $request): View
+    {
         if (!$request->hasValidSignature()) {
-            return view('activation_verification', [
+            return view('auth.activation-progres', [
                 'status' => 'error',
                 'message' => 'Tautan verifikasi telah kadaluarsa atau tidak valid.',
             ]);
         }
 
-        $userId = $request->route('userId');
-        $deviceName = $request->query('deviceName');
-        $fingerprint = $request->query('fingerprint');
-        $restaurantId = $request->query('restaurantId');
-        $os = $request->query('os');
-        $browser = $request->query('browser');
-
-        $alreadyTrusted = TrustedDivice::where('user_id', $userId)
-            ->where('device_fingerprint', $fingerprint)
-            ->exists();
-
-        if ($alreadyTrusted) {
-            return view('device_verification', [
-                'status' => 'error',
-                'message' => 'Tautan sudah pernah digunakan. Perangkat ini sudah berstatus Terpercaya.',
-            ]);
-        }
+        $userId = $request->input('userId');
+        $restaurantId = $request->input('restaurantId');
 
         try {
-            $user = User::where('id', $userId)
-                ->where('restaurant_id', $restaurantId)
-                ->firstOrFail();
+            $user = User::query()->findOrFail($userId);
+            $restaurant = Restaurant::query()->findOrFail($restaurantId);
 
-            TrustedDivice::create([
-                'user_id' => $userId,
-                'restaurant_id' => $restaurantId,
-                'device_name' => $deviceName,
-                'device_fingerprint' => $fingerprint,
-            ]);
+            if ($user->status == 'active') {
+                return view('auth.activation-progres', [
+                    'status' => 'error',
+                    'message' => 'Tautan sudah pernah digunakan. Pengguna ini sudah berstatus aktif.',
+                ]);
+            }
+            $restaurant->status = 'active';
+            $user->status = 'active';
+            $user->save();
+            $restaurant->save();
 
-            // Mail::to($user->email)->send(new SendDeviceVerificationMail($user, 'success', [
-            //     'deviceName' => $deviceName,
-            //     'os' => $os,
-            //     'browser' => $browser,
-            // ]));
+            Mail::to($user->email)->send(new SendNewRestaurantRegistrationRequest($user, $restaurant, 'success'));
 
-            return view('device_verification', [
+
+            return view('auth.activation-progres', [
                 'status' => 'success',
-                'message' => 'Perangkat Anda telah resmi terdaftar sebagai perangkat terpercaya.',
-                'deviceName' => $deviceName,
+                'message' => 'Pengguna ini sudah berstatus aktif.',
+                'userName' => $user->name,
+                'restaurantName' => $restaurant->name,
             ]);
         } catch (\Exception $e) {
-            return view('device_verification', [
+            return view('auth.activation-progres', [
                 'status' => 'error',
-                'message' => 'Gagal memverifikasi perangkat karena gangguan sistem.',
+                'message' => 'Gagal aktifasi Pengguna karena gangguan sistem.',
             ]);
         }
     }
@@ -137,46 +126,67 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        // 1. Cek User & Password (Menggantikan User.verifyCredentials)
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Credentials tidak valid', 'code' => 'invalid_credential'], 400);
+        // Attempt login
+        if (!Auth::guard('web')->attempt($credentials)) {
+            return response()->json([
+                'message' => 'Credentials tidak valid',
+                'code' => 'invalid_credential'
+            ], 400);
         }
 
-        // 2. Cek apakah status disabled
+        // Regenerate session
+        $request->session()->regenerate();
+
+        // Ambil user login
+        $user = Auth::guard('web')->user();
+
+        // Cek status disabled
         if ($user->status === 'disabled') {
-            return response()->json(['message' => 'Akun disabled', 'code' => 'disabled'], 401);
+
+            Auth::guard('web')->logout();
+
+            return response()->json([
+                'message' => 'Akun disabled',
+                'code' => 'disabled'
+            ], 401);
         }
 
-        // 3. Ambil device fingerprint dari cookie
+        // Ambil fingerprint dari cookie
         $deviceFingerprint = $request->cookie('device_fingerprint');
 
         if (!$deviceFingerprint) {
-            return response()->json(['message' => 'Credentials tidak valid', 'code' => 'invalid_fp'], 400);
+
+            return response()->json([
+                'message' => 'Credentials tidak valid',
+                'code' => 'invalid_fp'
+            ], 400);
         }
 
-        // 4. Periksa apakah perangkat dikenali (Gunakan bypass global scope bila perlu)
-        $isTrusted = TrustedDivice::where('user_id', $user->id)
+        // Cek trusted device
+        $isTrusted = TrustedDevice::query()->where('user_id', $user->id)
             ->where('device_fingerprint', $deviceFingerprint)
             ->exists();
 
         if (!$isTrusted) {
-            return response()->json(['message' => 'Device Tidak Dikenali', 'code' => 'not_trusted'], 404);
+
+            return response()->json([
+                'message' => 'Device Tidak Dikenali',
+                'code' => 'not_trusted'
+            ], 404);
         }
 
-        // 5. Eksekusi Login menggunakan Default Web Guard
-        Auth::guard('web')->login($user);
-
-        // 6. Set Session Penanda Trusted Device
+        // Set trusted session
         $request->session()->put('device_trusted', true);
 
-        return response()->json(['message' => 'Login Berhasil', 'code' => 'success'], 200);
+        return response()->json([
+            'message' => 'Login Berhasil',
+            'code' => 'success'
+        ], 200);
     }
 
     /**
@@ -193,7 +203,7 @@ class AuthController extends Controller
         // Menggunakan hash hmac sha256 dengan APP_KEY bawaan Laravel
         $hashDeviceFingerprint = hash_hmac('sha256', $deviceFingerprint, config('app.key'));
 
-        $isTrusted = TrustedDivice::where('user_id', Auth::guard('web')->id())
+        $isTrusted = TrustedDevice::query()->where('user_id', Auth::guard('web')->id())
             ->where('device_fingerprint', $hashDeviceFingerprint)
             ->exists();
 
@@ -216,23 +226,38 @@ class AuthController extends Controller
     {
         $user = Auth::guard('web')->user();
 
-        if (!$user) $user = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+        if (!$user) {
 
-        if (!$user) return response()->json(['message' => 'Credentials tidak valid', 'code' => 'invalid_credential'], 400);
+            $credentials = $request->validate([
+                'email' => 'required|email',
+            ]);
 
-        // Membuat Temporary Signed URL yang kedaluwarsa dalam 5 menit
+            $user = User::query()
+                ->select(['*'])
+                ->where('email', $credentials['email']);
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Credentials tidak valid',
+                    'code' => 'invalid_credential'
+                ], 400);
+            }
+        }
+
+        // Membuat Temporary Signed URL
         $signedUrl = URL::temporarySignedRoute(
             'change-password',
             now()->addMinutes(5),
             ['userId' => $user->id]
         );
 
-        Mail::to($user->email)->send(new SendResetPasswordMail($user, $signedUrl));
+        Mail::to($user->email)->send(
+            new SendResetPasswordMail($user, $signedUrl)
+        );
 
-        return response()->json(['message' => 'Email pemulihan kata sandi telah dikirim.']);
+        return response()->json([
+            'message' => 'Email pemulihan kata sandi telah dikirim.'
+        ]);
     }
 
     /**
@@ -251,7 +276,7 @@ class AuthController extends Controller
         // 2. Simpan izin restriksi di session
         $request->session()->put('password_reset_allowed_id', $user->id);
 
-        return view('auth/reset_password_form', [
+        return view('auth.request-reset-password-form', [
             'userName' => $user->name,
             'userId' => $user->id,
         ]);
@@ -300,7 +325,7 @@ class AuthController extends Controller
         $user = Auth::guard('web')->user();
 
         // Cari admin restoran terkait
-        $admin = User::where('role', 'admin')
+        $admin = User::query()->where('role', 'admin')
             ->where('restaurant_id', $user->restaurant_id)
             ->firstOrFail();
 
@@ -337,7 +362,7 @@ class AuthController extends Controller
     public function verify(Request $request)
     {
         if (!$request->hasValidSignature()) {
-            return view('device_verification', [
+            return view('auth.device-verification', [
                 'status' => 'error',
                 'message' => 'Tautan verifikasi telah kadaluarsa atau tidak valid.',
             ]);
@@ -350,42 +375,42 @@ class AuthController extends Controller
         $os = $request->query('os');
         $browser = $request->query('browser');
 
-        $alreadyTrusted = TrustedDivice::where('user_id', $userId)
+        $alreadyTrusted = TrustedDevice::query()->where('user_id', $userId)
             ->where('device_fingerprint', $fingerprint)
             ->exists();
 
         if ($alreadyTrusted) {
-            return view('device_verification', [
+            return view('auth.device-verification', [
                 'status' => 'error',
                 'message' => 'Tautan sudah pernah digunakan. Perangkat ini sudah berstatus Terpercaya.',
             ]);
         }
 
         try {
-            $user = User::where('id', $userId)
+            $user = User::query()->where('id', $userId)
                 ->where('restaurant_id', $restaurantId)
                 ->firstOrFail();
 
-            TrustedDivice::create([
+            TrustedDevice::create([
                 'user_id' => $userId,
                 'restaurant_id' => $restaurantId,
                 'device_name' => $deviceName,
                 'device_fingerprint' => $fingerprint,
             ]);
 
-            // Mail::to($user->email)->send(new SendDeviceVerificationMail($user, 'success', [
-            //     'deviceName' => $deviceName,
-            //     'os' => $os,
-            //     'browser' => $browser,
-            // ]));
+            Mail::to($user->email)->send(new SendDeviceVerificationMail($user, 'success', [
+                'deviceName' => $deviceName,
+                'os' => $os,
+                'browser' => $browser,
+            ]));
 
-            return view('device_verification', [
+            return view('auth.device-verification', [
                 'status' => 'success',
                 'message' => 'Perangkat Anda telah resmi terdaftar sebagai perangkat terpercaya.',
                 'deviceName' => $deviceName,
             ]);
         } catch (\Exception $e) {
-            return view('device_verification', [
+            return view('auth.device-verification', [
                 'status' => 'error',
                 'message' => 'Gagal memverifikasi perangkat karena gangguan sistem.',
             ]);
@@ -399,7 +424,7 @@ class AuthController extends Controller
     {
         $restaurant = Auth::guard('restaurant')->user();
 
-        $admin = User::where('role', 'admin')
+        $admin = User::query()->where('role', 'admin')
             ->where('restaurant_id', $restaurant->id)
             ->firstOrFail();
 
@@ -428,7 +453,7 @@ class AuthController extends Controller
 
         $request->session()->put('pin_reset_allowed_id', $restaurant->id);
 
-        return view('auth.reset_pin_form', [
+        return view('auth.reset-pin', [
             'restaurantName' => $restaurant->name,
             'restaurantId' => $restaurant->id,
         ]);
@@ -478,7 +503,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'PIN wajib diisi', 'code' => 'pin_required'], 400);
         }
 
-        $restaurant = Restaurant::where('id', $user->restaurant_id)
+        $restaurant = Restaurant::query()->where('id', $user->restaurant_id)
             ->select('id', 'restaurant_uid', 'pin')
             ->first();
 
@@ -503,11 +528,6 @@ class AuthController extends Controller
             'kitchen' => '/kitchen',
             default => null,
         };
-
-        if ($redirectUrl === null) {
-            $user->delete(); // Sesuai perilaku logic adonis milikmu jika role bermasalah
-            return response()->json(['message' => 'Role tidak valid', 'code' => 'invalid_role'], 401);
-        }
 
         return response()->json([
             'message' => 'PIN valid',

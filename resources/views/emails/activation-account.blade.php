@@ -9,7 +9,7 @@
         <h2 style="color: #1a73e8; text-align: center;">Pengaktifan Restaurant</h2>
 
         <p>Halo <strong>AnoBos</strong>,</p>
-        <p>Kami menerima permintaan untuk Pengaktifan Akun {{ $user->name }}. Silakan klik tombol di bawah ini untuk melanjutkan:</p>
+        <p>Kami menerima permintaan untuk Pengaktifan Akun {{ $user->name }} dengan Nama Restaurant {{ $restaurant->name }}. Silakan klik tombol di bawah ini untuk melanjutkan:</p>
 
         <div style="text-align: center; margin: 35px 0;">
             <a href="{{ $enableAccountUrl }}"

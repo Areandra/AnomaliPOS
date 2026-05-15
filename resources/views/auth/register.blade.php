@@ -87,7 +87,8 @@
                     required />
             </div>
             <template x-if="errors.restaurant_name">
-                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter" x-text="errors.restaurant_name"></p>
+                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter"
+                    x-text="errors.restaurant_name"></p>
             </template>
         </div>
 
@@ -106,7 +107,8 @@
                     required />
             </div>
             <template x-if="errors.restaurant_pin">
-                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter" x-text="errors.restaurant_pin"></p>
+                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter"
+                    x-text="errors.restaurant_pin"></p>
             </template>
         </div>
 
@@ -114,8 +116,7 @@
         <div class="flex items-center justify-between px-1 mb-6">
             <label class="flex items-center gap-3 cursor-pointer group">
                 <div class="relative flex items-center">
-                    <input type="checkbox" x-model="form.remember"
-                        class="peer h-5 w-5 opacity-0 absolute cursor-pointer" />
+                    <input type="checkbox" x-model="form.remember" class="peer h-5 w-5 opacity-0 absolute cursor-pointer" />
                     <div
                         class="h-5 w-5 rounded-md border border-white/10 bg-slate-950 peer-checked:bg-amber-500 peer-checked:border-amber-500 transition-all">
                     </div>
@@ -184,6 +185,10 @@
                             this.handleError(data.code)
                             return
                         }
+
+                        this.$store.notif.set('success', 'Berhasil',
+                            'Akun Berhasil Di-Buat Kami Akan Mengirim Email Saat Akun Anda Berhasi Di Aktifasi')
+                        setTimeout(() => window.location.href = '/login', 5500)
 
                     } catch (e) {
                         this.$store.notif.set('error', 'Error', 'Ada Kesalahan, Coba lagi nanti')

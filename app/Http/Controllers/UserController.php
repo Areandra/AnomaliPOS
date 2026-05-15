@@ -13,11 +13,9 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $users = UserService::allUser(Auth::guard('web')->user()->auth()->id());
+        $users = UserService::allUser(Auth::guard('web')->user()->id);
 
-        return view('user/index', [
-            'data' => $users,
-        ]);
+        return view('users.index', compact('users'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -31,7 +29,7 @@ class UserController extends Controller
             'password',
         ]);
 
-        UserService::createOrUpdateUser($data);
+        UserService::createOrUpdateUser([...$data, 'restaurant_id' => Auth::guard('restaurant')->user()->id]);
 
         return redirect('/users');
     }
@@ -41,15 +39,13 @@ class UserController extends Controller
         try {
             $user = UserService::getUser($id);
 
-            return view('user/create', [
-                'curretUserEditData' => $user,
-            ]);
+            return view('users.create', compact('user'));
         } catch (\Throwable $e) {
             if ($id === 'create') {
-                return view('user/create');
+                return view('users.create');
             }
 
-            return view('errors/not_found');
+            return view('errors.not-found');
         }
     }
 
@@ -70,7 +66,7 @@ class UserController extends Controller
 
             return redirect('/users');
         } catch (\Throwable $e) {
-            return view('errors/not_found');
+            return view('errors.not-found');
         }
     }
 
@@ -87,7 +83,7 @@ class UserController extends Controller
 
             return redirect('/users');
         } catch (\Throwable $e) {
-            return view('errors/not_found');
+            return view('errors.not-found');
         }
     }
 
@@ -96,25 +92,25 @@ class UserController extends Controller
         try {
             $user = UserService::getUser($id);
 
-            $user->delete();
+            $user->delete($user->id);
 
             return redirect('/users');
         } catch (\Throwable $e) {
-            return view('errors/not_found');
+            return view('errors.not-found');
         }
     }
 
-    public function toggleStatus(Request $request, string $id)
+    public function toggleStatus(Request $request)
     {
         try {
-            $user = UserService::getUser($id, ['id', 'status']);
+            $user = UserService::getUser($request->id, ['id', 'status']);
 
-            $user->status = $request->input('status');
+            $user->status = $user->status == 'active' ? 'disabled' : 'active';
             $user->save();
 
             return redirect('/users');
         } catch (\Throwable $e) {
-            return view('errors/not_found');
+            return view('errors.not-found');
         }
     }
 

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TrustedDivice extends Model
+class TrustedDevice extends Model
 {
     // Override karena nama tabel menggunakan huruf 'i' (trusted_divices)
     protected $table = 'trusted_divices';
