@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Restaurant;
 use App\Models\User;
 
 return [
@@ -42,6 +43,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'restaurant' => [
+            'driver' => 'session',
+            'provider' => 'restaurant',
+        ],
     ],
 
     /*
@@ -66,7 +71,10 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
         ],
-
+        'restaurant' => [
+            'driver' => 'eloquent',
+            'model' => Restaurant::class,
+        ],
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',

@@ -73,7 +73,7 @@
             <span class="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition-colors">Keep Active</span>
         </label>
 
-        <a href="{{ route('reset-password', ['userId' => 1]) }}" class="text-[10px] font-black uppercase tracking-widest text-amber-500/50 hover:text-amber-500 transition-colors">
+        <a href="{{ route('request-change-password-form') }}" class="text-[10px] font-black uppercase tracking-widest text-amber-500/50 hover:text-amber-500 transition-colors">
             Forgot Key?
         </a>
     </div>

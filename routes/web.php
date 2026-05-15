@@ -1,109 +1,113 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
-// ─── REDIRECT ROOT ───────────────────────────────────────────
-Route::get('/', function () {
-    return redirect()->route('login');
+Route::prefix('register')->group(function () {
+    Route::view('/', 'auth.register')->name('register-form');
+    Route::post('/', [AuthController::class, 'register']);
 });
 
-// ─── LOGIN ───────────────────────────────────────────────────
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+Route::get('/account-activation/{userId}', [AuthController::class, 'register'])
+    ->name('account-activation')
+    ->middleware('signed');
 
-Route::post('/login', function (Request $request) {
-    $dummy = [
-        'email'    => 'admin@anopos.com',
-        'password' => 'password123',
-    ];
+// ========================================================================
+// Login User
+// ========================================================================
 
-    if (
-        $request->email !== $dummy['email'] ||
-        $request->password !== $dummy['password']
-    ) {
-        return response()->json(['code' => 'invalid_credential'], 401);
-    }
+Route::prefix('login')->group(function () {
 
-    // Simpan session login dummy
-    session(['dummy_logged_in' => true, 'dummy_email' => $request->email]);
+    Route::view('/', 'auth.login')->name('login');
 
-    return response()->json(['status' => 'ok']);
+    Route::post('/', [AuthController::class, 'login']);
+
+    Route::middleware('auth')->group(function () {
+
+        Route::post('/re-verify-device', [
+            AuthController::class,
+            'verifyNewDevice'
+        ]);
+
+        Route::post('/request-trust', [
+            AuthController::class,
+            'requestToTrust'
+        ]);
+    });
+
+    Route::get('/verify-device/{userId}', [
+        AuthController::class,
+        'verify'
+    ])->name('verify_device')->middleware('signed');
 });
 
-// ─── RE-VERIFY DEVICE ────────────────────────────────────────
-Route::post('/login/re-verify-device', function (Request $request) {
-    // Dummy: selalu lolos
-    return response()->json(['status' => 'ok']);
-});
+// ========================================================================
+// Restaurant PIN
+// ========================================================================
 
-// ─── REQUEST TRUST DEVICE ────────────────────────────────────
-Route::post('/login/request-trust', function (Request $request) {
-    // Dummy: selalu berhasil
-    return response()->json(['status' => 'ok']);
-});
+Route::prefix('login/restaurant-pin')
+    ->middleware(['auth', 'trusted.device'])
+    ->group(function () {
 
-// ─── RESTAURANT PIN ──────────────────────────────────────────
-Route::get('/login/restaurant-pin', function () {
-    return view('auth.restaurant-pin');
-})->name('restaurant-pin');
+        Route::view('/', 'auth.restaurant-pin');
 
-Route::post('/login/restaurant-pin', function (Request $request) {
-    $dummyPin = '123456';
+        Route::post('/', [AuthController::class, 'restaurantPin']);
+    });
 
-    if ($request->pin !== $dummyPin) {
-        return response()->json([
-            'code'    => 'invalid_pin',
-            'message' => 'PIN salah, coba lagi',
-        ], 401);
-    }
+// ========================================================================
+// Logout
+// ========================================================================
 
-    session(['dummy_pin_verified' => true]);
+Route::post('/sign-out', [AuthController::class, 'logout'])
+    ->middleware(['auth', 'auth.restaurant']);
 
-    return response()->json([
-        'status'   => 'ok',
-        'redirect' => '/dashboard',
+// ========================================================================
+// Change PIN
+// ========================================================================
+
+Route::middleware('auth.restaurant')->group(function () {
+
+    Route::post('/request-change-pin', [
+        AuthController::class,
+        'requestToChangePin'
     ]);
 });
 
-// ─── DASHBOARD (placeholder) ─────────────────────────────────
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
+Route::get('/change-restaurant-pin/{restaurantId}', [
+    AuthController::class,
+    'showChangePin'
+])
+    ->name('change-restaurant-pin')
+    ->middleware('signed');
 
-// ─── RESET PASSWORD ──────────────────────────────────────────
-Route::get('/reset-password/{userId}', function ($userId) {
-    return view('auth.reset-password', [
-        'userId'   => $userId,
-        'userName' => 'Admin Dummy',
-    ]);
-})->name('reset-password');
+Route::post('/change-restaurant-pin/{restaurantId}', [
+    AuthController::class,
+    'updatePin'
+]);
 
-Route::post('/reset-password', function (Request $request) {
-    $validated = $request->validate([
-        'password'              => 'required|min:6|confirmed',
-        'password_confirmation' => 'required',
-    ]);
+// ========================================================================
+// Change Password
+// ========================================================================
 
-    // Dummy: langsung sukses
-    return response()->json(['status' => 'ok']);
+Route::prefix('request-change-password')->group(function () {
+    Route::get('/', function () {
+        return view('auth.request-reset-password-form');
+    })->name('request-change-password-form');
+
+    Route::post('/', [
+        AuthController::class,
+        'requestToChangePassword'
+    ])->name('request-change-password');
 });
 
-// ─── RESET PIN ───────────────────────────────────────────────
-Route::get('/reset-pin/{restaurantId}', function ($restaurantId) {
-    return view('auth.reset-pin', [
-        'restaurantId'   => $restaurantId,
-        'restaurantName' => 'Outlet Dummy',
-    ]);
-})->name('reset-pin');
+Route::get('/change-password/{userId}', [
+    AuthController::class,
+    'showChangePassword'
+])
+    ->name('change-password')
+    ->middleware('signed');
 
-Route::post('/reset-pin', function (Request $request) {
-    $validated = $request->validate([
-        'pin'              => 'required|digits:6|confirmed',
-        'pin_confirmation' => 'required',
-    ]);
-
-    // Dummy: langsung sukses
-    return response()->json(['status' => 'ok']);
-});
+Route::post('/change-password/{userId}', [
+    AuthController::class,
+    'updatePassword'
+]);
