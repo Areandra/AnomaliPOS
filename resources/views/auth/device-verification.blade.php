@@ -22,8 +22,8 @@
             {{-- ICON STATUS --}}
             <div class="flex justify-center mb-8">
                 <div :class="isSuccess
-                        ? (isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-emerald-50 border-emerald-100 text-emerald-600')
-                        : (isDark ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-red-50 border-red-100 text-red-600')"
+                            ? (isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-emerald-50 border-emerald-100 text-emerald-600')
+                            : (isDark ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-red-50 border-red-100 text-red-600')"
                     class="relative h-24 w-24 rounded-[2.5rem] flex items-center justify-center shadow-2xl border">
                     <template x-if="isSuccess">
                         <i data-lucide="shield-check" class="w-12 h-12 animate-bounce"></i>
@@ -89,7 +89,9 @@
                         localStorage.setItem('theme', val ? 'dark' : 'light')
                         document.documentElement.setAttribute('data-theme', val ? 'dark' : 'light')
                     })
-                    lucide.createIcons()
+
+                    // Panggil setelah x-if selesai render
+                    this.$nextTick(() => lucide.createIcons())
                 }
             }
         }
