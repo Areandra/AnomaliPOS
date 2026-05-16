@@ -14,7 +14,7 @@ class MenuCategoryController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $categories = MenuCategory::where('restaurant_id', $restaurantId)
+        $categories = MenuCategory::query()->where('restaurant_id', $restaurantId)
             ->withCount('items')
             ->orderBy('sort_order')
             ->get();
@@ -49,7 +49,7 @@ class MenuCategoryController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $category = MenuCategory::where('id', $id)
+        $category = MenuCategory::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
@@ -60,7 +60,7 @@ class MenuCategoryController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $category = MenuCategory::where('id', $id)
+        $category = MenuCategory::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
@@ -79,7 +79,7 @@ class MenuCategoryController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $category = MenuCategory::where('id', $id)
+        $category = MenuCategory::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 

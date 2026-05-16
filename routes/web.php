@@ -41,41 +41,43 @@ Route::get('/dashboard', [DashboardController::class, 'index']);
 Route::redirect('/menu', '/menu/items');
 Route::redirect('/shift', '/shifts');
 
-// ========================================================================
-// CASHIER ROUTES
-// ========================================================================
+Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+    // ========================================================================
+    // CASHIER ROUTES
+    // ========================================================================
 
-Route::get('/cashier', [CashierController::class, 'index'])
-    ->name('cashier.index');
+    Route::get('/cashier', [CashierController::class, 'index'])
+        ->name('cashier.index');
 
-Route::get('/cashier/order/start', [CashierController::class, 'start'])
-    ->name('cashier.order.start');
+    Route::get('/cashier/order/start', [CashierController::class, 'start'])
+        ->name('cashier.order.start');
 
-// ========================================================================
-// SHIFT API
-// ========================================================================
+    // ========================================================================
+    // SHIFT API
+    // ========================================================================
 
-Route::post('/api/shifts/open',  [ShiftController::class, 'open'])->name('shifts.open');
-Route::post('/api/shifts/close', [ShiftController::class, 'close'])->name('shifts.close');
+    Route::post('/shifts/open',  [ShiftController::class, 'open'])->name('shifts.open');
+    Route::post('/shifts/close', [ShiftController::class, 'close'])->name('shifts.close');
 
-// ========================================================================
-// ORDER API
-// ========================================================================
+    // ========================================================================
+    // ORDER API
+    // ========================================================================
 
-Route::post('/api/order',                    [OrderController::class, 'store']);
-Route::get('/api/order/{id}',                [OrderController::class, 'show']);
-Route::post('/api/order/add-item',           [OrderController::class, 'addItem']);
-Route::post('/api/order/update-qty',         [OrderController::class, 'updateQty']);
-Route::post('/api/order/delete-item',        [OrderController::class, 'deleteItem']);
-Route::post('/api/order/place-order/{id}',   [OrderController::class, 'placeOrder']);
-Route::post('/api/order/{id}/notes',         [OrderController::class, 'makeNotes']);
-Route::post('/api/session/{token}/end',      [OrderController::class, 'endSession']);
+    Route::post('/order',                    [OrderController::class, 'store']);
+    Route::get('/order/{id}',                [OrderController::class, 'show']);
+    Route::post('/order/add-item',           [OrderController::class, 'addItem']);
+    Route::post('/order/update-qty',         [OrderController::class, 'updateQty']);
+    Route::post('/order/delete-item',        [OrderController::class, 'deleteItem']);
+    Route::post('/order/place-order/{id}',   [OrderController::class, 'placeOrder']);
+    Route::post('/order/{id}/notes',         [OrderController::class, 'makeNotes']);
+    Route::post('/session/{token}/end',      [OrderController::class, 'endSession']);
 
-// ========================================================================
-// PAYMENT API
-// ========================================================================
+    // ========================================================================
+    // PAYMENT API
+    // ========================================================================
 
-Route::post('/api/payments', [PaymentController::class, 'store']);
+    Route::post('/payments', [PaymentController::class, 'store']);
+});
 
 // ========================================================================
 // LOGIN USER

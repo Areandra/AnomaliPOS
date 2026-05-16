@@ -76,7 +76,7 @@
     <div x-data="adminLayoutData({ theme: '{{ $theme }}' })"
          :class="{ 'dark': isDark }"
          class="relative h-dvh transition-colors duration-500 bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-gray-100 font-sans">
-        
+
         <template x-if="isDark">
             <div class="fixed inset-0 pointer-events-none opacity-10">
                 <div class="absolute top-0 left-0 w-96 h-96 bg-indigo-600 rounded-full blur-[100px]"></div>
@@ -113,7 +113,7 @@
                         <span class="hidden md:block">{{ $link['label'] }}</span>
                     </a>
                 @endforeach
-                
+
                 <button x-show="!isFullscreen" @click="toggleFullscreen()" class="flex items-center gap-2 px-4 py-2 rounded-full duration-300 font-black text-[10px] uppercase tracking-widest shadow-sm bg-white text-orange-600 hover:bg-orange-50 border border-gray-200 dark:bg-slate-800 dark:text-amber-500 dark:hover:bg-slate-700 dark:border-white/5">
                     <x-lucide-fullscreen class="w-[18px] h-[18px]" />
                     <span class="hidden md:block">FullScreen</span>
@@ -151,7 +151,7 @@
                         <x-lucide-user x-bind:class="hide ? 'mx-auto w-[22px] h-[22px]' : 'w-[18px] h-[18px]'" />
                         <span x-show="!hide" class="ml-4 text-[11px] font-black uppercase tracking-widest">Settings</span>
                     </a>
-                    
+
                     <a href="/restaurant/info" class="w-full flex items-center p-3 rounded-full transition-all {{ $isRestoActive ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20 dark:bg-amber-500 dark:text-slate-950 dark:shadow-amber-500/20' : 'text-gray-500 hover:bg-gray-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white' }}">
                         <x-lucide-settings x-bind:class="hide ? 'mx-auto w-[22px] h-[22px]' : 'w-[18px] h-[18px]'" />
                         <span x-show="!hide" class="ml-4 text-[11px] font-black uppercase tracking-widest">Settings</span>
@@ -161,7 +161,7 @@
 
             <main class="flex-1 overflow-hidden relative">
                 <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-[size:20px_20px] opacity-40 pointer-events-none dark:hidden"></div>
-                
+
                 <div class="relative h-full overflow-y-auto no-scrollbar">
                     {{ $slot }}
                 </div>

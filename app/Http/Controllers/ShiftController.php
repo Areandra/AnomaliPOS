@@ -11,9 +11,9 @@ class ShiftController extends Controller
 {
     public function open(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $user = Auth::guard('web')->user();
 
-        $existing = Shift::where('user_id', $user->id)
+        $existing = Shift::query()->where('user_id', $user->id)
             ->where('status', 'open')
             ->first();
 
@@ -113,7 +113,7 @@ class ShiftController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $shift = Shift::where('id', $id)
+        $shift = Shift::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
@@ -140,7 +140,7 @@ class ShiftController extends Controller
 
     public function historyMe(Request $request): \Illuminate\View\View
     {
-        $shifts = Shift::where('user_id', $request->user()->id)
+        $shifts = Shift::query()->where('user_id', $request->user()->id)
             ->where('status', 'closed')
             ->orderBy('opened_at', 'desc')
             ->get();
@@ -160,7 +160,7 @@ class ShiftController extends Controller
 
     public function attendenceMe(Request $request): \Illuminate\View\View
     {
-        $shifts = Shift::where('user_id', $request->user()->id)
+        $shifts = Shift::query()->where('user_id', $request->user()->id)
             ->where('status', 'closed')
             ->orderBy('opened_at', 'desc')
             ->get();

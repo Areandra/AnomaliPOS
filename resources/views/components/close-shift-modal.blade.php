@@ -1,14 +1,21 @@
-{{-- Close Shift Modal --}}
+@props([
+    'isDark' => true
+])
+
+{{-- Menggunakan x-show agar sinkron dengan state openCloseModal dan mendukung animasi transition --}}
 <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex justify-center items-center z-[100] p-4 lg:p-6 overflow-hidden select-none"
-    x-data="closeShiftModal()">
+    x-show="openCloseModal"
+    x-transition.opacity.duration.300ms
+    x-data="closeShiftModal({ isDark: {{ json_encode($isDark) }} })">
 
     <div class="flex flex-col lg:flex-row w-full h-full max-h-[850px] gap-4 transition-all duration-500 ease-in-out"
         :class="step === 2 ? 'max-w-md' : 'max-w-5xl'">
 
-        {{-- PANEL KIRI --}}
+        {{-- PANEL KIRI: Form Pecahan, Review, & Summary Variance --}}
         <div class="flex-[1.5] flex flex-col rounded-[2.5rem] border overflow-hidden shadow-2xl"
             :class="isDark ? 'bg-slate-950 border-white/10 text-white' : 'bg-white border-gray-200 text-slate-900'">
 
+            {{-- Header --}}
             <div class="px-8 py-6 border-b border-white/5 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="isDark ? 'text-amber-500' : 'text-orange-600'"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
@@ -19,9 +26,10 @@
                 </button>
             </div>
 
+            {{-- Body Content Berdasarkan Step --}}
             <div class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 scrollbar-hide">
 
-                {{-- STEP 1: Daftar Pecahan --}}
+                {{-- STEP 1: Daftar Pecahan Rupiah --}}
                 <template x-if="step === 1">
                     <div class="space-y-3">
                         <template x-for="item in currencies" :key="item.value">
@@ -30,7 +38,8 @@
                                 :class="activeValue === item.value
                                     ? (isDark ? 'bg-white/10 border-amber-500 shadow-lg scale-[1.02]' : 'bg-gray-50 border-orange-600 shadow-md scale-[1.02]')
                                     : 'border-transparent opacity-60'">
-                                {{-- Banknote visual --}}
+
+                                {{-- Visual Koin/Kertas --}}
                                 <template x-if="item.isCoin">
                                     <div class="relative w-12 h-12 rounded-full border-4 flex items-center justify-center shadow-inner transition-transform duration-500 border-white/20"
                                         :class="[item.gradient, activeValue === item.value ? 'scale-110 rotate-[10deg]' : 'scale-90 opacity-80']">
@@ -45,6 +54,7 @@
                                         <div class="absolute right-2 bottom-1 text-xs font-black text-white drop-shadow-md uppercase tracking-tighter" x-text="item.label"></div>
                                     </div>
                                 </template>
+
                                 <div class="ml-5 flex-1 text-left">
                                     <p class="text-lg font-black tracking-tighter leading-none" x-text="'Rp ' + item.label"></p>
                                     <p class="text-[8px] font-bold opacity-30 uppercase mt-1 tracking-widest" x-text="item.isCoin ? 'Koin Logam' : 'Uang Kertas'"></p>
@@ -57,7 +67,7 @@
                     </div>
                 </template>
 
-                {{-- STEP 2: Review --}}
+                {{-- STEP 2: Review Kas & Catatan Selisih --}}
                 <template x-if="step === 2">
                     <div class="p-4 space-y-6">
                         <div class="p-8 rounded-[2rem] border-2 border-dashed text-center"
@@ -73,7 +83,7 @@
                     </div>
                 </template>
 
-                {{-- STEP 3: Summary --}}
+                {{-- STEP 3: Ringkasan Hasil (Variance) --}}
                 <template x-if="step === 3 && summary">
                     <div class="p-4 space-y-4">
                         <div class="w-20 h-20 mx-auto rounded-[2rem] flex items-center justify-center mb-4 text-white shadow-2xl"
@@ -106,6 +116,7 @@
                 </template>
             </div>
 
+            {{-- Footer Action Buttons --}}
             <div class="p-6 bg-black/10 border-t border-white/5">
                 <div class="flex gap-3">
                     <template x-if="step === 2">
@@ -130,12 +141,14 @@
             </div>
         </div>
 
-        {{-- PANEL KANAN: Numpad (step 1) atau User Info (step 3) --}}
+        {{-- PANEL KANAN: Kalkulator Numpad (step 1) atau Identitas Kasir Bertugas (step 3) --}}
         <template x-if="step === 1 || step === 3">
             <div class="flex-1 flex flex-col gap-4">
+
+                {{-- Numpad (Muncul hanya pada Step 1) --}}
                 <template x-if="step === 1">
                     <div class="contents">
-                        {{-- Header Input --}}
+                        {{-- Viewer Jumlah Lembar/Koin --}}
                         <div class="h-40 rounded-[2.5rem] border-2 flex items-center px-8 gap-8"
                             :class="isDark ? 'bg-slate-900 border-white/5' : 'bg-gray-50 border-gray-100'">
                             <div class="flex-1 text-right">
@@ -146,7 +159,7 @@
                             </div>
                         </div>
 
-                        {{-- Numpad --}}
+                        {{-- Layout Grid Tombol --}}
                         <div class="flex-1 grid grid-cols-3 gap-3 p-6 rounded-[2.5rem] border"
                             :class="isDark ? 'bg-slate-900/50 border-white/5' : 'bg-white border-gray-100 shadow-xl'">
                             <template x-for="btn in [1,2,3,4,5,6,7,8,9,'C',0,'DEL']" :key="btn">
@@ -168,6 +181,7 @@
                     </div>
                 </template>
 
+                {{-- Ringkasan Sesi (Muncul hanya pada Step 3) --}}
                 <template x-if="step === 3">
                     <div class="flex-1 rounded-[2.5rem] border p-8 flex flex-col items-center justify-center text-center space-y-8"
                         :class="isDark ? 'bg-slate-900/50 border-white/5' : 'bg-gray-50 border-gray-200'">
@@ -204,5 +218,3 @@
         </template>
     </div>
 </div>
-
-

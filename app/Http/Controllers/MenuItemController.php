@@ -21,7 +21,7 @@ class MenuItemController extends Controller
             ->orderBy('name')
             ->get();
 
-        $categories = MenuCategory::where('restaurant_id', $restaurantId)
+        $categories = MenuCategory::query()->where('restaurant_id', $restaurantId)
             ->orderBy('sort_order')
             ->get();
 
@@ -32,7 +32,7 @@ class MenuItemController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $categories = MenuCategory::where('restaurant_id', $restaurantId)
+        $categories = MenuCategory::query()->where('restaurant_id', $restaurantId)
             ->orderBy('sort_order')
             ->get();
 
@@ -73,11 +73,11 @@ class MenuItemController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $item = MenuItem::where('id', $id)
+        $item = MenuItem::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
-        $categories = MenuCategory::where('restaurant_id', $restaurantId)
+        $categories = MenuCategory::query()->where('restaurant_id', $restaurantId)
             ->orderBy('sort_order')
             ->get();
 
@@ -88,7 +88,7 @@ class MenuItemController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $item = MenuItem::where('id', $id)
+        $item = MenuItem::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
@@ -125,7 +125,7 @@ class MenuItemController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $item = MenuItem::where('id', $id)
+        $item = MenuItem::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
@@ -142,7 +142,7 @@ class MenuItemController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $item = MenuItem::where('id', $id)
+        $item = MenuItem::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
