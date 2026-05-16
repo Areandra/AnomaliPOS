@@ -1,3 +1,8 @@
+@props([
+    'title' => 'Auth Terminal',
+    'subtitle' => 'Masukkan kredensial Anda'
+])
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -5,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Auth Terminal')</title>
+    <title>{{ $title }}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -21,7 +26,7 @@
 <body>
     <div x-data x-cloak>
 
-        {{-- Notification Stack --}}
+        {{-- Notification Stack (Tetap Utuh) --}}
         <div class="fixed top-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none" style="min-width:280px">
             <template x-for="notif in $store.notifs.items" :key="notif.id">
                 <div
@@ -51,7 +56,7 @@
 
         <div class="h-dvh flex flex-col lg:flex-row bg-slate-950 font-sans">
 
-            {{-- LEFT: BRANDING --}}
+            {{-- LEFT: BRANDING (Tetap Utuh) --}}
             <div class="hidden lg:block lg:w-3/5 relative bg-cover bg-center overflow-hidden"
                 style="background-image: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop')">
 
@@ -93,7 +98,7 @@
                 </div>
             </div>
 
-            {{-- RIGHT: FORM --}}
+            {{-- RIGHT: FORM (Bagian Konten Dinamis) --}}
             <div class="w-full lg:w-2/5 flex flex-col items-center bg-slate-950 relative overflow-y-auto no-scrollbar py-12 px-8 sm:px-16">
                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none"></div>
 
@@ -109,19 +114,23 @@
                     </div>
 
                     <div class="space-y-2 mb-10 text-center lg:text-left">
-                        <h3 class="text-3xl font-black text-white tracking-tighter uppercase">@yield('title', 'Auth Terminal')</h3>
-                        <p class="text-gray-500 text-sm font-medium uppercase tracking-wider">@yield('subtitle', 'Masukkan kredensial Anda')</p>
+                        <h3 class="text-3xl font-black text-white tracking-tighter uppercase">{{ $title }}</h3>
+                        <p class="text-gray-500 text-sm font-medium uppercase tracking-wider">{{ $subtitle }}</p>
                     </div>
 
                     <div class="bg-white/5 border border-white/5 p-2 rounded-3xl backdrop-blur-sm">
                         <div class="bg-slate-900/50 p-8 rounded-[1.8rem]">
-                            @yield('form')
+                            {{-- Tempat Utama Form Berada --}}
+                            {{ $slot }}
                         </div>
                     </div>
 
-                    <div class="mt-8 text-center">
-                        @yield('footer_link')
-                    </div>
+                    {{-- Tempat Link Footer Dinamis --}}
+                    @if (isset($footerLink))
+                        <div class="mt-8 text-center">
+                            {{ $footerLink }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -148,7 +157,6 @@
                 }
             })
 
-            // backward compat — komponen lain masih pakai $store.notif.set(...)
             Alpine.store('notif', {
                 set(type, title, message = '') {
                     Alpine.store('notifs').set(type, title, message)
