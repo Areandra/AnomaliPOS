@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.restaurant' => \App\Http\Middleware\AuthenticateRestaurantMiddleware::class,
             'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
             'trusted.device' => \App\Http\Middleware\TrustedDeviceMiddleware::class,
+            'plan.acsess' => \App\Http\Middleware\PlanAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

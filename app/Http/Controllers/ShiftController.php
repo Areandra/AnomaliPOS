@@ -135,7 +135,7 @@ class ShiftController extends Controller
             ->where('status', 'closed')
             ->firstOrFail();
 
-        return view('shift/show', ['shift' => $shift]);
+        return view('shift.show', ['shift' => $shift]);
     }
 
     public function historyMe(Request $request): \Illuminate\View\View
@@ -175,6 +175,6 @@ class ShiftController extends Controller
             'status'       => $s->status,
         ]);
 
-        return view('attendence/me', ['data' => $data]);
+        return view('attendence.me', ['data' => $data]);
     }
 }

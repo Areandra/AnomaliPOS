@@ -170,7 +170,7 @@ function resetPassword() {
             this.errors = {}
 
             try {
-                const res = await fetch('/reset-password', {
+                const res = await fetch(`/users/${id}/password`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

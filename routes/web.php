@@ -93,15 +93,15 @@ Route::prefix('login')->group(function () {
 
     Route::middleware('auth')->group(function () {
 
-    Route::post('/re-verify-device', [
-        AuthController::class,
-        'verifyNewDevice'
-    ]);
+        Route::post('/re-verify-device', [
+            AuthController::class,
+            'verifyNewDevice'
+        ]);
 
-    Route::post('/request-trust', [
-        AuthController::class,
-        'requestToTrust'
-    ]);
+        Route::post('/request-trust', [
+            AuthController::class,
+            'requestToTrust'
+        ]);
     });
 
     Route::get('/verify-device/{userId}', [
@@ -147,10 +147,10 @@ Route::post('/sign-out', [
 Route::middleware('auth.restaurant')
     ->group(function () {
 
-Route::post('/request-change-pin', [
-    AuthController::class,
-    'requestToChangePin'
-]);
+        Route::post('/request-change-pin', [
+            AuthController::class,
+            'requestToChangePin'
+        ]);
     });
 
 Route::get('/change-restaurant-pin/{restaurantId}', [
@@ -181,6 +181,8 @@ Route::prefix('request-change-password')->group(function () {
     ])->name('request-change-password');
 });
 
+Route::get('/change-password', [AuthController::class, 'showChangePassword'])->name('change-password');
+
 // ========================================================================
 // USER MANAGEMENT
 // ========================================================================
@@ -188,6 +190,7 @@ Route::prefix('request-change-password')->group(function () {
 Route::middleware([
     'auth',
     'auth.restaurant',
+    'plan.acsess'
 ])->group(function () {
 
     Route::get('/users', [
@@ -230,14 +233,13 @@ Route::middleware([
         UserController::class,
         'updatePassword'
     ])->name('users.update-password');
-
 });
 
 // ========================================================================
 // TABLE CRUD
 // ========================================================================
 
-Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+Route::middleware(['auth', 'auth.restaurant', 'plan.acsess'])->group(function () {
     Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
     Route::get('/tables/create', [TableController::class, 'create'])->name('tables.create');
     Route::post('/tables', [TableController::class, 'store'])->name('tables.store');
@@ -250,7 +252,7 @@ Route::middleware(['auth', 'auth.restaurant'])->group(function () {
 // MENU CATEGORY CRUD
 // ========================================================================
 
-Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+Route::middleware(['auth', 'auth.restaurant', 'plan.acsess'])->group(function () {
     Route::get('/menu/categories', [MenuCategoryController::class, 'index'])->name('menu.categories.index');
     Route::get('/menu/categories/create', [MenuCategoryController::class, 'create'])->name('menu.categories.create');
     Route::post('/menu/categories', [MenuCategoryController::class, 'store'])->name('menu.categories.store');
@@ -263,7 +265,7 @@ Route::middleware(['auth', 'auth.restaurant'])->group(function () {
 // MENU ITEM CRUD
 // ========================================================================
 
-Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+Route::middleware(['auth', 'auth.restaurant', 'plan.acsess'])->group(function () {
     Route::get('/menu/items', [MenuItemController::class, 'index'])->name('menu.items.index');
     Route::get('/menu/items/create', [MenuItemController::class, 'create'])->name('menu.items.create');
     Route::post('/menu/items', [MenuItemController::class, 'store'])->name('menu.items.store');
@@ -277,7 +279,7 @@ Route::middleware(['auth', 'auth.restaurant'])->group(function () {
 // SHIFT CRUD
 // ========================================================================
 
-Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+Route::middleware(['auth', 'auth.restaurant', 'plan.acsess'])->group(function () {
     Route::get('/shifts', [ShiftController::class, 'history'])->name('shifts.index');
     Route::get('/shifts/{id}', [ShiftController::class, 'show'])->name('shifts.show');
     Route::delete('/shifts/{id}', [ShiftController::class, 'destroy'])->name('shifts.destroy');

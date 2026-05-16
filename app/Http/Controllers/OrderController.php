@@ -10,6 +10,7 @@ use App\Models\Table;
 use App\Models\TableSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
@@ -73,7 +74,7 @@ class OrderController extends Controller
     {
         $restaurantId = session('restaurant_id');
         $plan         = session('restaurant_plan', 'starter');
-        $userId       = auth()->id();
+        $userId       = Auth::guard('web')->user()->id;
 
         // Starter plan: buat order kosong tanpa meja
         if ($plan === 'starter') {
