@@ -2,132 +2,132 @@
 
     <div x-data="registerForm()">
         {{-- SECTION: Owner --}}
-        <div class="flex items-center gap-2 mb-4">
+        <div class="mb-4 flex items-center gap-2">
             <div class="h-px flex-1 bg-white/5"></div>
-            <span class="text-[9px] font-black uppercase tracking-[0.3em] text-amber-500/70 px-2">Owner Account</span>
+            <span class="px-2 text-[9px] font-black uppercase tracking-[0.3em] text-amber-500/70">Owner Account</span>
             <div class="h-px flex-1 bg-white/5"></div>
         </div>
 
         {{-- Name --}}
-        <div class="space-y-2 mb-4">
-            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">Nama
+        <div class="mb-4 space-y-2">
+            <label class="ml-1 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Nama
                 Lengkap</label>
-            <div class="relative group">
+            <div class="group relative flex items-center">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-amber-500 transition-colors">
-                    <i data-lucide="user" class="w-[18px] h-[18px]"></i>
+                    class="absolute left-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <i data-lucide="user" class="h-[18px] w-[18px]"></i>
                 </div>
                 <input type="text" x-model="form.name" placeholder="John Doe"
-                    class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-white font-medium placeholder:text-gray-700 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5 transition-all" />
+                    class="w-full rounded-2xl border border-white/5 bg-slate-950/50 py-4 pl-12 pr-4 font-medium text-white outline-none transition-all placeholder:text-gray-700 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5" />
             </div>
             <template x-if="errors.name">
-                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter" x-text="errors.name"></p>
+                <p class="ml-1 text-[10px] font-black uppercase tracking-tighter text-red-500" x-text="errors.name"></p>
             </template>
         </div>
 
         {{-- Email --}}
-        <div class="space-y-2 mb-4">
-            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">Email</label>
-            <div class="relative group">
+        <div class="mb-4 space-y-2">
+            <label class="ml-1 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Email</label>
+            <div class="group relative flex items-center">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-amber-500 transition-colors">
-                    <i data-lucide="mail" class="w-[18px] h-[18px]"></i>
+                    class="absolute left-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <i data-lucide="mail" class="h-[18px] w-[18px]"></i>
                 </div>
                 <input type="email" x-model="form.email" placeholder="owner@email.com"
-                    class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-white font-medium placeholder:text-gray-700 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5 transition-all" />
+                    class="w-full rounded-2xl border border-white/5 bg-slate-950/50 py-4 pl-12 pr-4 font-medium text-white outline-none transition-all placeholder:text-gray-700 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5" />
             </div>
             <template x-if="errors.email">
-                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter" x-text="errors.email">
+                <p class="ml-1 text-[10px] font-black uppercase tracking-tighter text-red-500" x-text="errors.email">
                 </p>
             </template>
         </div>
 
         {{-- Password --}}
-        <div class="space-y-2 mb-6">
-            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">Password</label>
-            <div class="relative group">
+        <div class="mb-6 space-y-2">
+            <label class="ml-1 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Password</label>
+            <div class="group relative flex items-center">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-amber-500 transition-colors">
-                    <i data-lucide="lock" class="w-[18px] h-[18px]"></i>
+                    class="absolute left-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <i data-lucide="lock" class="h-[18px] w-[18px]"></i>
                 </div>
                 <input :type="showPassword ? 'text' : 'password'" x-model="form.password" placeholder="••••••••"
-                    class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-12 rounded-2xl text-white font-medium placeholder:text-gray-700 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5 transition-all" />
+                    class="w-full rounded-2xl border border-white/5 bg-slate-950/50 py-4 pl-12 pr-12 font-medium text-white outline-none transition-all placeholder:text-gray-700 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5" />
                 <button type="button" @click="showPassword = !showPassword"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-amber-500 transition-colors">
-                    <template x-if="showPassword">
-                        <i data-lucide="eye-off" class="w-[18px] h-[18px]"></i>
-                    </template>
-                    <template x-if="!showPassword">
-                        <i data-lucide="eye" class="w-[18px] h-[18px]"></i>
-                    </template>
+                    class="absolute right-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <span x-show="showPassword" class="flex items-center">
+                        <x-lucide-eye-off class="h-[18px] w-[18px]" />
+                    </span>
+                    <span x-show="!showPassword" class="flex items-center">
+                        <x-lucide-eye class="h-[18px] w-[18px]" />
+                    </span>
                 </button>
             </div>
             <template x-if="errors.password">
-                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter" x-text="errors.password">
+                <p class="ml-1 text-[10px] font-black uppercase tracking-tighter text-red-500" x-text="errors.password">
                 </p>
             </template>
         </div>
 
         {{-- SECTION: Restaurant --}}
-        <div class="flex items-center gap-2 mb-4">
+        <div class="mb-4 flex items-center gap-2">
             <div class="h-px flex-1 bg-white/5"></div>
-            <span class="text-[9px] font-black uppercase tracking-[0.3em] text-amber-500/70 px-2">Restaurant</span>
+            <span class="px-2 text-[9px] font-black uppercase tracking-[0.3em] text-amber-500/70">Restaurant</span>
             <div class="h-px flex-1 bg-white/5"></div>
         </div>
 
         {{-- Restaurant Name --}}
-        <div class="space-y-2 mb-4">
-            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">Nama
+        <div class="mb-4 space-y-2">
+            <label class="ml-1 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Nama
                 Restoran</label>
-            <div class="relative group">
+            <div class="group relative flex items-center">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-amber-500 transition-colors">
-                    <i data-lucide="chef-hat" class="w-[18px] h-[18px]"></i>
+                    class="absolute left-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <i data-lucide="chef-hat" class="h-[18px] w-[18px]"></i>
                 </div>
                 <input type="text" x-model="form.restaurant_name" placeholder="Warung Makan Saya"
-                    class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-white font-medium placeholder:text-gray-700 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5 transition-all" />
+                    class="w-full rounded-2xl border border-white/5 bg-slate-950/50 py-4 pl-12 pr-4 font-medium text-white outline-none transition-all placeholder:text-gray-700 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5" />
             </div>
             <template x-if="errors.restaurant_name">
-                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter"
+                <p class="ml-1 text-[10px] font-black uppercase tracking-tighter text-red-500"
                     x-text="errors.restaurant_name"></p>
             </template>
         </div>
 
         {{-- Restaurant PIN --}}
-        <div class="space-y-2 mb-6">
-            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">PIN
+        <div class="mb-6 space-y-2">
+            <label class="ml-1 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">PIN
                 Restoran</label>
-            <div class="relative group">
+            <div class="group relative flex items-center">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-amber-500 transition-colors">
-                    <i data-lucide="key-round" class="w-[18px] h-[18px]"></i>
+                    class="absolute left-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <i data-lucide="key-round" class="h-[18px] w-[18px]"></i>
                 </div>
                 <input :type="showPin ? 'text' : 'password'" x-model="form.restaurant_pin"
                     placeholder="PIN untuk akses kasir"
-                    class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-12 rounded-2xl text-white font-medium placeholder:text-gray-700 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5 transition-all" />
+                    class="w-full rounded-2xl border border-white/5 bg-slate-950/50 py-4 pl-12 pr-12 font-medium text-white outline-none transition-all placeholder:text-gray-700 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5" />
                 <button type="button" @click="showPin = !showPin"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-amber-500 transition-colors">
-                    <template x-if="showPin">
-                        <i data-lucide="eye-off" class="w-[18px] h-[18px]"></i>
-                    </template>
-                    <template x-if="!showPin">
-                        <i data-lucide="eye" class="w-[18px] h-[18px]"></i>
-                    </template>
+                    class="absolute right-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <span x-show="showPassword" class="flex items-center">
+                        <x-lucide-eye-off class="h-[18px] w-[18px]" />
+                    </span>
+                    <span x-show="!showPassword" class="flex items-center">
+                        <x-lucide-eye class="h-[18px] w-[18px]" />
+                    </span>
                 </button>
             </div>
-            <p class="text-[9px] text-gray-600 ml-1">PIN digunakan untuk masuk ke mode kasir setiap shift.</p>
+            <p class="ml-1 text-[9px] text-gray-600">PIN digunakan untuk masuk ke mode kasir setiap shift.</p>
             <template x-if="errors.restaurant_pin">
-                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter"
+                <p class="ml-1 text-[10px] font-black uppercase tracking-tighter text-red-500"
                     x-text="errors.restaurant_pin"></p>
             </template>
         </div>
 
         {{-- Submit --}}
         <button type="button" @click="submit" :disabled="processing"
-            class="w-full py-5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 shadow-xl shadow-amber-500/20">
+            class="flex w-full items-center justify-center gap-3 rounded-2xl bg-amber-500 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-950 shadow-xl shadow-amber-500/20 transition-all hover:bg-amber-400 active:scale-95 disabled:opacity-50">
             <template x-if="processing">
                 <span class="flex items-center gap-3">
-                    <svg class="animate-spin w-[18px] h-[18px]" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    <svg class="h-[18px] w-[18px] animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                             stroke-width="4"></circle>
@@ -140,7 +140,7 @@
             <template x-if="!processing">
                 <span class="flex items-center gap-3">
                     Daftar Sekarang
-                    <i data-lucide="arrow-right" class="w-[18px] h-[18px]"></i>
+                    <i data-lucide="arrow-right" class="h-[18px] w-[18px]"></i>
                 </span>
             </template>
         </button>
@@ -214,9 +214,9 @@
     </script>
 
     @slot('footerLink')
-        <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest">
+        <p class="text-[10px] font-black uppercase tracking-widest text-gray-600">
             Sudah punya akun?
-            <a href="/login" class="text-amber-500 hover:text-amber-400 transition-colors ml-1">Login di sini</a>
+            <a href="/login" class="ml-1 text-amber-500 transition-colors hover:text-amber-400">Login di sini</a>
         </p>
     @endslot
 

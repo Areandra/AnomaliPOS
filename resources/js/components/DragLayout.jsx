@@ -35,16 +35,36 @@ export default function DragLayout({
     table,
     onClick,
     // baseTable,
-    theme = "dark", // Menambahkan prop theme
     viewMode,
     onCLick,
 }) {
     const mapRef = useRef();
     const [newTablesData, setNewTablesData] = useState(table);
-    const isDark = theme === "dark";
+
+    const theme = document.documentElement.classList.contains("dark")
+        ? "dark"
+        : "light";
     const [drag, setDrag] = useState(false);
     const [editMode, setEditMode] = useState("information");
     const [isTableLayoutChanged, setIsTableLayoutChanged] = useState(false);
+    const [isDark, setIsDark] = useState(() =>
+        document.documentElement.classList.contains("dark"),
+    );
+    const toggleTheme = () => {
+        window.dispatchEvent(new CustomEvent("toggle-theme"));
+    };
+
+    useEffect(() => {
+        const handleThemeChange = () => {
+            setTimeout(() => {
+                setIsDark(document.documentElement.classList.contains("dark"));
+            }, 0);
+        };
+
+        window.addEventListener("toggle-theme", handleThemeChange);
+        return () =>
+            window.removeEventListener("toggle-theme", handleThemeChange);
+    }, []);
 
     const editModeList = [
         { name: "information", placeholder: "Info", icon: <Info size={14} /> },
@@ -152,7 +172,7 @@ export default function DragLayout({
                       ? !data.facing
                           ? 2
                           : 2
-                      : (data.capacity / 4) * 1 + 2,
+                      : (data.capacity / 4) * 2,
             ),
             h: Math.ceil(
                 data.vertical
@@ -160,7 +180,7 @@ export default function DragLayout({
                         ? !data.facing
                             ? 2
                             : 2
-                        : (data.capacity / 4) * 1 + 2
+                        : (data.capacity / 4) * 2
                     : 2,
             ),
         })),
@@ -190,22 +210,22 @@ export default function DragLayout({
             newTablesData.map((data, idx) => ({
                 ...prev[idx],
                 w: Math.ceil(
-                    !(data.capacity > 4)
-                        ? !data.facing
-                            ? 2
-                            : 2
-                        : data.vertical
-                          ? 2
-                          : (data.capacity / 4) * 1 + 6 / data.capacity,
+                    data.vertical
+                        ? 2
+                        : !(data.capacity > 4)
+                          ? !data.facing
+                              ? 2
+                              : 2
+                          : (data.capacity / 4) * 2,
                 ),
                 h: Math.ceil(
-                    !(data.capacity > 4)
-                        ? !data.facing
-                            ? 2
-                            : 2
-                        : data.vertical
-                          ? (data.capacity / 4) * 1 + 6 / data.capacity
-                          : 2,
+                    data.vertical
+                        ? !(data.capacity > 4)
+                            ? !data.facing
+                                ? 2
+                                : 2
+                            : (data.capacity / 4) * 2
+                        : 2,
                 ),
             })),
         );
@@ -436,12 +456,12 @@ export default function DragLayout({
                             className={`w-px h-6 mx-1 ${isDark ? "bg-white/10" : "bg-gray-300"}`}
                         />
 
-                        {/* <button
+                        <button
                             onClick={() => toggleTheme()}
                             className={`p-2 rounded-full transition-transform active:rotate-90 hover:scale-110 ${isDark ? "text-amber-400 hover:bg-slate-800" : "text-slate-600 hover:bg-white shadow-sm"}`}
                         >
                             {isDark ? <Sun size={16} /> : <Moon size={16} />}
-                        </button> */}
+                        </button>
                     </div>
                 </div>
             </div>

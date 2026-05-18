@@ -6,9 +6,9 @@
             <label for="email" class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">
                 System Identifier / Email
             </label>
-            <div class="relative group">
+            <div class="group relative flex items-center">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-amber-500 transition-colors">
+                    class="absolute left-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
                     <i data-lucide="mail" class="w-[18px] h-[18px]"></i>
                 </div>
                 <input id="email" type="email" x-model="form.email" placeholder="example@posqir.sys"

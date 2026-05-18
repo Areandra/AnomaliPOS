@@ -1,4 +1,4 @@
-<x-admin-layout title="Management > Dashboard">
+<x-admin-layout title="Management Dashboard" page_title="Management > Dashboard">
 
 <div x-data="dashboardApp()" class="p-8 pb-16 space-y-8 transition-colors duration-500"
     :class="isDark ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'">

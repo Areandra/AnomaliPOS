@@ -1,6 +1,5 @@
 @props([
     'title' => null,
-    'theme' => 'light',
 ])
 
 @php
@@ -46,44 +45,24 @@
         'active' => str_contains($currentUrl, 'shift') || str_contains($currentUrl, 'history'),
     ];
 
-    // 2. Data Links Header
     $links = [];
     if ($atLeastPro) {
         $links[] = ['label' => 'Kitchen', 'href' => '/kitchen/kot', 'icon' => 'utensils'];
     }
     $links[] = ['label' => 'Cashier', 'href' => '/cashier', 'icon' => 'calculator'];
 
-    // Cek status menu setting bawah
     $isMeActive = str_contains($currentUrl, '/me') && !str_contains($currentUrl, '/menu');
     $isRestoActive = str_contains($currentUrl, '/restaurant');
 @endphp
 
-<!DOCTYPE html>
-<html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ $title ?? 'AnoPos' }}</title>
-
-    @viteReactRefresh
-
-    @vite(['resources/css/app.css', 'resources/js/app.jsx'])
-
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-
-    {{ $head ?? '' }}
-</head>
-
-<body class="antialiased">
-
-    <div x-data="adminLayoutData({ theme: '{{ $theme }}' })" :class="{ 'dark': isDark }"
+<x-app-layout :title="$title ?? 'Admin AnoPos'">
+    <div x-data="{
+        hide: localStorage.getItem('hideSideBar') === 'true',
+        init() {
+            this.$watch('hide', value => localStorage.setItem('hideSideBar', value));
+        }
+    }"
         class="relative h-dvh bg-gray-50 font-sans text-gray-900 transition-colors duration-500 dark:bg-slate-950 dark:text-gray-100">
-        <x-notification />
 
         <template x-if="isDark">
             <div class="pointer-events-none fixed inset-0 opacity-10">
@@ -107,12 +86,11 @@
 
                 <div class="flex flex-col">
                     <span class="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">
-                        Ano<span class="text-orange-600 dark:text-amber-500">Pos</span>
+                        Anomali<span class="text-orange-600 dark:text-amber-500">POS</span>
                     </span>
-                    @if ($title)
-                        <span class="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">
-                            {{ $title }}
-                        </span>
+                    @if (isset($page_title) || isset($title))
+                        <span
+                            class="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">{{ isset($page_title) ? $page_title : $title }}</span>
                     @endif
                 </div>
             </div>
@@ -126,6 +104,7 @@
                     </a>
                 @endforeach
 
+                {{-- Memanggil logic toggleFullscreen dari master layout langsung --}}
                 <button x-show="!isFullscreen" @click="toggleFullscreen()"
                     class="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-orange-600 shadow-sm duration-300 hover:bg-orange-50 dark:border-white/5 dark:bg-slate-800 dark:text-amber-500 dark:hover:bg-slate-700">
                     <x-lucide-fullscreen class="h-[18px] w-[18px]" />
@@ -138,17 +117,12 @@
             <aside :class="hide ? 'w-20' : 'w-64'"
                 class="relative z-40 h-full shrink-0 border-r border-gray-200 bg-white duration-500 dark:border-white/5 dark:bg-slate-900">
                 <div class="flex h-14 w-full items-center justify-between border-b border-transparent p-4">
-                    <span x-show="!hide" class="px-2 text-[10px] font-black uppercase tracking-widest opacity-40">
-                        Navigation
-                    </span>
+                    <span x-show="!hide"
+                        class="px-2 text-[10px] font-black uppercase tracking-widest opacity-40">Navigation</span>
                     <button @click="hide = !hide" :class="hide ? 'm-auto' : ''"
                         class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-50 dark:text-gray-500 dark:hover:bg-white/5">
-                        <template x-if="hide">
-                            <x-lucide-chevron-right class="h-[18px] w-[18px]" />
-                        </template>
-                        <template x-if="!hide">
-                            <x-lucide-chevron-left class="h-[18px] w-[18px]" />
-                        </template>
+                        <template x-if="hide"><x-lucide-chevron-right class="h-[18px] w-[18px]" /></template>
+                        <template x-if="!hide"><x-lucide-chevron-left class="h-[18px] w-[18px]" /></template>
                     </button>
                 </div>
 
@@ -184,7 +158,6 @@
                 <div
                     class="pointer-events-none absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-[size:20px_20px] opacity-40 dark:hidden">
                 </div>
-
                 <div class="no-scrollbar relative h-full overflow-y-auto">
                     {{ $slot }}
                 </div>
@@ -199,89 +172,5 @@
                 </div>
             @endif
         </div>
-
-        <script>
-            document.addEventListener('alpine:init', () => {
-                Alpine.store('notifs', {
-                    items: [],
-                    _counter: 0,
-
-                    set(type, title, message = '') {
-                        const id = ++this._counter
-                        this.items.push({
-                            id,
-                            type,
-                            title,
-                            message,
-                            visible: true
-                        })
-                        setTimeout(() => this.dismiss(id), 4000)
-                    },
-
-                    dismiss(id) {
-                        const item = this.items.find(n => n.id === id)
-                        if (item) item.visible = false
-                        setTimeout(() => {
-                            this.items = this.items.filter(n => n.id !== id)
-                        }, 300)
-                    }
-                })
-
-                Alpine.store('notif', {
-                    set(type, title, message = '') {
-                        Alpine.store('notifs').set(type, title, message)
-                    }
-                })
-                Alpine.data('adminLayoutData', (config) => ({
-                    isDark: config.theme === 'dark',
-                    hide: true,
-                    isFullscreen: false,
-
-                    init() {
-                        const savedTheme = localStorage.getItem('theme');
-                        // Jika ada, pakai tema yang disimpan
-                        if (savedTheme) {
-                            this.isDark = savedTheme === 'dark';
-                        } else {
-                            this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                        }
-                        window.addEventListener('toggle-theme', () => {
-                            this.isDark = !this.isDark;
-                            // SIMPAN ke LocalStorage biar pas refresh nggak ilang
-                            localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
-                        });
-
-
-                        // Sinkronisasi preferensi sidebar
-                        const hideSideBar = localStorage.getItem('hideSideBar');
-                        if (hideSideBar !== null) {
-                            this.hide = hideSideBar === 'true';
-                        }
-                        this.$watch('hide', value => localStorage.setItem('hideSideBar', value));
-                    },
-
-                    toggleFullscreen() {
-                        if (!document.fullscreenElement) {
-                            document.documentElement.requestFullscreen().catch(err => {
-                                console.error(
-                                    `Error attempting to enable fullscreen: ${err.message}`);
-                            });
-                            this.isFullscreen = true;
-                        } else {
-                            if (document.exitFullscreen) {
-                                document.exitFullscreen();
-                                this.isFullscreen = false;
-                            }
-                        }
-                    }
-                }));
-            });
-
-            document.addEventListener('alpine:initialized', () => lucide.createIcons())
-            document.addEventListener('alpine:mutated', () => lucide.createIcons())
-        </script>
     </div>
-
-</body>
-
-</html>
+</x-app-layout>

@@ -18,7 +18,6 @@
         'table' => $tableData,
         'drag' => false,
         'editMode' => 'information',
-        'theme' => 'dark',
     ];
 @endphp
 
@@ -94,13 +93,13 @@
                         </div>
                     </button>
 
-                    <button @click="$store.theme.toggle(); $nextTick(() => { lucide.createIcons(); renderMap(); })"
-                        class="rounded-full p-2 transition-transform hover:scale-110 active:rotate-90"
-                        :class="isDark ?
-                            'text-amber-400 hover:bg-slate-800' :
-                            'text-slate-600 hover:bg-white shadow-sm'">
-                        <i :data-lucide="isDark ? 'sun' : 'moon'" class="h-4 w-4"></i>
-                    </button>
+                        {{-- <button @click="$dispatch('toggle-theme')"
+                            class="rounded-full p-2 transition-transform hover:scale-110 active:rotate-90"
+                            :class="isDark ?
+                                'text-amber-400 hover:bg-slate-800' :
+                                'text-slate-600 hover:bg-white shadow-sm'">
+                            <i :data-lucide="isDark ? 'sun' : 'moon'" class="h-4 w-4"></i>
+                        </button> --}}
                 </div>
             </div>
         </div>

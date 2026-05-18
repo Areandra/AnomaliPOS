@@ -1,30 +1,12 @@
-@props(['currentShift' => null, 'pageTitle' => null])
+@props(['currentShift' => null, 'pageTitle' => null, 'title' => 'Cashier AnoPos'])
 
-<!DOCTYPE html>
-<html lang="id" x-data="themeManager()">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'AnoPos' }}</title>
-
-    @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/js/app.jsx'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</head>
-
-<body class="transition-colors duration-500"
-    :class="isDark ? 'bg-slate-950 text-gray-100' : 'bg-[#FDFBF7] text-gray-900'">
-
+<x-app-layout :title="$title">
     <div class="flex h-dvh flex-col overflow-hidden transition-colors duration-500">
 
-        {{-- HEADER --}}
         <header
             class="fixed left-0 top-0 z-50 flex h-16 w-full items-center justify-between border-b px-6 backdrop-blur-xl duration-300"
             :class="isDark ? 'bg-slate-900/70 border-white/5' : 'bg-white/70 border-gray-200/50'">
 
-            {{-- KIRI --}}
             <div class="flex items-center gap-2">
                 <div class="-ml-5">
                     <button onclick="window.history.back()" class="group rounded-xl p-2 duration-200"
@@ -58,7 +40,6 @@
                 </div>
             </div>
 
-            {{-- KANAN --}}
             <div class="flex items-center gap-6">
                 <div class="flex items-center gap-3">
                     @isset($headerLinks)
@@ -135,48 +116,4 @@
         </main>
 
     </div>
-
-    <script>
-        function themeManager() {
-            return {
-                isDark: localStorage.getItem('theme') === 'dark',
-                isFullscreen: false,
-
-                toggleTheme() {
-                    this.isDark = !this.isDark;
-                    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
-                    this.updateRootTheme();
-                },
-
-                updateRootTheme() {
-                    document.documentElement.classList.toggle('dark', this.isDark);
-                    document.documentElement.dataset.theme = this.isDark ? 'dark' : 'light';
-                },
-
-                toggleFullscreen() {
-                    if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen();
-                        this.isFullscreen = true;
-                    } else {
-                        document.exitFullscreen();
-                        this.isFullscreen = false;
-                    }
-                },
-
-                init() {
-                    // Sync state awal ke DOM
-                    this.updateRootTheme();
-
-                    // Listen event dari child components (active-order-panel, dll)
-                    window.addEventListener('toggle-theme', () => this.toggleTheme());
-
-                    document.addEventListener('fullscreenchange', () => {
-                        this.isFullscreen = !!document.fullscreenElement;
-                    });
-                }
-            }
-        }
-    </script>
-</body>
-
-</html>
+</x-app-layout>

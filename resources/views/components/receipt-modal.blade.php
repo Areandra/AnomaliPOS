@@ -22,7 +22,7 @@
         </div>
 
         {{-- Receipt --}}
-        <div class="h-full px-8 overflow-y-auto">
+        <div class="h-[85%] px-8 overflow-y-auto">
             <div id="receipt-print-area"
                  class="bg-white text-slate-950 p-6 rounded-sm shadow-inner relative"
                  style="font-family: 'Courier New', Courier, monospace">

@@ -15,9 +15,9 @@
             <label class="ml-1 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                 System Identifier / Email
             </label>
-            <div class="group relative">
+            <div class="group relative flex items-center">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    class="absolute left-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
                     <i data-lucide="mail" class="h-[18px] w-[18px]"></i>
                 </div>
                 <input type="email" x-model="form.email" placeholder="example@anopos.sys"
@@ -34,21 +34,21 @@
             <label class="ml-1 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                 Access Key / Password
             </label>
-            <div class="group relative">
+            <div class="group relative flex items-center">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    class="absolute left-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
                     <i data-lucide="lock" class="h-[18px] w-[18px]"></i>
                 </div>
                 <input :type="showPassword ? 'text' : 'password'" x-model="form.password" placeholder="••••••••"
                     class="w-full rounded-2xl border border-white/5 bg-slate-950/50 py-4 pl-12 pr-12 font-medium text-white outline-none transition-all placeholder:text-gray-700 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5" />
                 <button type="button" @click="showPassword = !showPassword"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 transition-colors hover:text-amber-500">
-                    <template x-if="showPassword">
-                        <i data-lucide="eye-off" class="h-[18px] w-[18px]"></i>
-                    </template>
-                    <template x-if="!showPassword">
-                        <i data-lucide="eye" class="h-[18px] w-[18px]"></i>
-                    </template>
+                    class="absolute right-4 z-10 flex items-center justify-center text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <span x-show="showPassword" class="flex items-center">
+                        <x-lucide-eye-off class="h-[18px] w-[18px]" />
+                    </span>
+                    <span x-show="!showPassword" class="flex items-center">
+                        <x-lucide-eye class="h-[18px] w-[18px]" />
+                    </span>
                 </button>
             </div>
             <template x-if="errors.password">

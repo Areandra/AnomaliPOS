@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\MenuCategoryController;
 use App\Http\Controllers\MenuItemController;
+use Illuminate\Support\Facades\Auth;
 
 // ========================================================================
 // REGISTER
@@ -80,29 +81,33 @@ Route::prefix('login')->group(function () {
 // RESTAURANT PIN
 // ========================================================================
 
-Route::prefix('login/restaurant-pin')
-    ->middleware([
-        'auth',
-        'trusted.device'
-    ])
+Route::middleware([
+    'auth',
+    'trusted.device'
+])
     ->group(function () {
 
-        Route::view('/', 'auth.restaurant-pin');
+        Route::view('/login/restaurant-pin', 'auth.restaurant-pin');
 
-        Route::post('/', [
+        Route::post('/login/restaurant-pin', [
             AuthController::class,
             'restaurantPin'
         ]);
+
+        // ========================================================================
+        // LOGOUT
+        // ========================================================================
+
+        Route::post('/sign-out', function () {
+            Auth::guard('web')->logout();
+            Auth::guard('restaurant')->logout();
+
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+            request()->session()->forget('auth_uid');
+            return redirect('/login');
+        })->name('logout');
     });
-
-// ========================================================================
-// LOGOUT
-// ========================================================================
-
-Route::post('/sign-out', [
-    AuthController::class,
-    'logout'
-]);
 
 // ========================================================================
 // CHANGE PIN
