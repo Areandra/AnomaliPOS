@@ -2,41 +2,49 @@
 
 namespace App\Models\Traits;
 
-use App\Services\RestaurantContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Context;
 
 /**
  * Trait BelongsToRestaurant
- * * @mixin \Illuminate\Database\Eloquent\Model
+ *
+ * @mixin \Illuminate\Database\Eloquent\Model
  */
 trait BelongsToRestaurant
 {
     /**
      * Boot trait untuk otomatisasi global scope dan model events.
-     * Nama method harus diawali kata 'boot' diikuti nama Trait-nya.
      */
     public static function bootBelongsToRestaurant(): void
     {
-        // Menambahkan global scope agar otomatis melakukan filter berdasarkan restaurant_id saat query data
+        // 1. Tambahkan Global Scope untuk Filter Otomatis
         static::addGlobalScope('restaurant_scope', function (Builder $builder) {
-            $context = app(RestaurantContext::class);
-            $restaurantId = $context->getRestaurantId();
+            // Mengambil restaurant_id langsung dari Laravel Context yang di-set oleh Middleware
+            $restaurantId = Context::get('restaurant_id');
 
             if ($restaurantId) {
-                // Menghindari konflik kolom jika ada query JOIN
+                // Menghindari konflik nama kolom jika ada query JOIN
                 $builder->where($builder->getModel()->getTable() . '.restaurant_id', $restaurantId);
             }
         });
 
-        // Sebelum data di-insert (Sama seperti @beforeCreate di AdonisJS)
+        // 2. Event saat membuat data baru (Otomatis mengisi restaurant_id)
         static::creating(function (Model $model) {
-            $context = app(RestaurantContext::class);
-            $restaurantId = $context->getRestaurantId();
+            $restaurantId = Context::get('restaurant_id');
 
             if ($restaurantId && !$model->restaurant_id) {
                 $model->restaurant_id = $restaurantId;
             }
         });
+    }
+
+    /**
+     * Relationship Helper
+     * Mempermudah memanggil data restoran terkait dari model ini ($this->restaurant)
+     */
+    public function restaurant()
+    {
+        return $this->belongsTo(\App\Models\Restaurant::class, 'restaurant_id');
     }
 }

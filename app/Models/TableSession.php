@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToRestaurant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TableSession extends Model
 {
+    use BelongsToRestaurant;
+
     protected $guarded = ['id'];
 
     protected $fillable = [
@@ -16,7 +19,9 @@ class TableSession extends Model
         'started_at',
         'ended_at',
         'is_active',
-        'token'
+        'token',
+        'guest',
+        'created_by'
     ];
 
     protected $casts = [

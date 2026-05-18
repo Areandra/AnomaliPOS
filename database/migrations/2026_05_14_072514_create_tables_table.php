@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
             $table->string('table_number');
             $table->integer('capacity');
-            $table->decimal('position_x', 10, 2)->nullable();
-            $table->decimal('position_y', 10, 2)->nullable();
+            $table->integer('position_x')->nullable();
+            $table->integer('position_y')->nullable();
             $table->boolean('facing')->default(false);
             $table->boolean('vertical')->default(false);
             $table->enum('status', ['available', 'occupied', 'waiting_payment'])->default('available');

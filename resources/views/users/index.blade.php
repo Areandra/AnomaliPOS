@@ -43,7 +43,7 @@
                         <input type="text" placeholder="Cari nama atau email..." x-model="searchQuery"
                             class="bg-transparent border-none outline-none w-full text-sm font-medium dark:text-white focus:ring-0" />
 
-                        <button @click="toggleTheme()"
+                        <button @click="window.dispatchEvent(new CustomEvent('toggle-theme')); $nextTick(() => lucide.createIcons())"
                             class="rounded-full transition-transform active:rotate-90 hover:scale-110 text-slate-600 hover:bg-white shadow-sm dark:text-amber-400 dark:hover:bg-slate-800 dark:shadow-none">
                             <template x-if="isDark"><x-lucide-sun class="w-[18px] h-[18px]" /></template>
                             <template x-if="!isDark"><x-lucide-moon class="w-[18px] h-[18px]" /></template>

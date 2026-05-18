@@ -6,12 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToRestaurant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shift extends Model
 {
+    use BelongsToRestaurant;
+
     protected $guarded = ['id'];
 
     protected $fillable = [

@@ -13,9 +13,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->scoped(RestaurantContext::class, function () {
-            return new RestaurantContext();
-        });
         $this->app->scoped(UserService::class, function () {
             return new UserService();
         });

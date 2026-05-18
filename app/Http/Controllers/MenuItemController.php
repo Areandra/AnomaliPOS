@@ -14,14 +14,12 @@ class MenuItemController extends Controller
 {
     public function index(): View
     {
-        $restaurantId = Auth::guard('restaurant')->user()->id;
 
         $items = MenuItem::with('category')
-            ->where('restaurant_id', $restaurantId)
             ->orderBy('name')
             ->get();
 
-        $categories = MenuCategory::query()->where('restaurant_id', $restaurantId)
+        $categories = MenuCategory::query()->select('*')
             ->orderBy('sort_order')
             ->get();
 
@@ -30,9 +28,8 @@ class MenuItemController extends Controller
 
     public function create(): View
     {
-        $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $categories = MenuCategory::query()->where('restaurant_id', $restaurantId)
+        $categories = MenuCategory::query()->select('*')
             ->orderBy('sort_order')
             ->get();
 
@@ -52,7 +49,6 @@ class MenuItemController extends Controller
             'image'         => 'nullable|image|max:2048',
         ]);
 
-        $restaurantId = Auth::guard('restaurant')->user()->id;
 
         $imageUrl = null;
         if ($request->hasFile('image')) {
@@ -61,7 +57,6 @@ class MenuItemController extends Controller
 
         MenuItem::create([
             ...$validated,
-            'restaurant_id' => $restaurantId,
             'is_available'  => $request->boolean('is_available', true),
             'image_url'     => $imageUrl,
         ]);
@@ -71,25 +66,21 @@ class MenuItemController extends Controller
 
     public function edit(string $id): View
     {
-        $restaurantId = Auth::guard('restaurant')->user()->id;
 
         $item = MenuItem::query()->where('id', $id)
-            ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
-        $categories = MenuCategory::query()->where('restaurant_id', $restaurantId)
+        $categories = MenuCategory::query()->select('*')
             ->orderBy('sort_order')
             ->get();
 
-        return view('menu.items.edit', compact('item', 'categories'));
+        return view('menu.items.create', compact('item', 'categories'));
     }
 
     public function update(Request $request, string $id): RedirectResponse
     {
-        $restaurantId = Auth::guard('restaurant')->user()->id;
 
         $item = MenuItem::query()->where('id', $id)
-            ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
         $validated = $request->validate([
@@ -123,27 +114,22 @@ class MenuItemController extends Controller
 
     public function destroy(string $id): RedirectResponse
     {
-        $restaurantId = Auth::guard('restaurant')->user()->id;
 
         $item = MenuItem::query()->where('id', $id)
-            ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
         if ($item->image_url) {
             Storage::disk('public')->delete($item->image_url);
         }
 
-        $item->delete();
+        $item->delete($item->id);
 
         return redirect()->route('menu.items.index')->with('success', 'Menu berhasil dihapus.');
     }
 
     public function toggleAvailable(string $id): RedirectResponse
     {
-        $restaurantId = Auth::guard('restaurant')->user()->id;
-
         $item = MenuItem::query()->where('id', $id)
-            ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
         $item->update(['is_available' => !$item->is_available]);

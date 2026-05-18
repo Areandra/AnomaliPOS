@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\Shift;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -29,7 +30,7 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Jumlah pembayaran kurang'], 400);
         }
 
-        $shift = Shift::where('user_id', auth()->id())
+        $shift = Shift::query()->where('user_id', Auth::guard('web')->user()->id)
             ->where('status', 'open')
             ->first();
 
@@ -41,8 +42,7 @@ class PaymentController extends Controller
 
         $payment = Payment::create([
             'order_id'       => $order->id,
-            'user_id'        => auth()->id(),
-            'restaurant_id'  => session('restaurant_id'),
+            'user_id'        => Auth::guard('web')->user()->id,
             'shift_id'       => $shift->id,
             'payment_method' => $request->paymentMethod,
             'amount'         => $request->amount,
@@ -51,11 +51,15 @@ class PaymentController extends Controller
             'paid_at'        => now(),
         ]);
 
+        $payment->load(['createdBy']);
+
         $order->update(['status' => 'completed']);
 
         $order->load(['items.menuItem', 'table', 'payment', 'tableSession.createdBy']);
 
+
         return response()->json([
+            'restaurant_name' => Auth::guard('restaurant')->user()->name,
             'payment' => $payment,
             'order'   => [
                 'id'         => $order->id,

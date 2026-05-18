@@ -157,12 +157,30 @@ class AuthController extends Controller
         }
 
         // Ambil fingerprint dari cookie
-        // DEVICE CHECK DINONAKTIFKAN SEMENTARA
-        // $deviceFingerprint = $request->cookie('device_fingerprint');
-        // if (!$deviceFingerprint) { ... }
-        // $isTrusted = TrustedDevice::query()...
+        $deviceFingerprint = $request->cookie('device_fingerprint');
 
-        // Set trusted session langsung
+        if (!$deviceFingerprint) {
+
+            return response()->json([
+                'message' => 'Credentials tidak valid',
+                'code' => 'invalid_fp'
+            ], 400);
+        }
+
+        // Cek trusted device
+        $isTrusted = TrustedDevice::query()->where('user_id', $user->id)
+            ->where('device_fingerprint', $deviceFingerprint)
+            ->exists();
+
+        if (!$isTrusted) {
+
+            return response()->json([
+                'message' => 'Device Tidak Dikenali',
+                'code' => 'not_trusted'
+            ], 404);
+        }
+
+        // Set trusted session
         $request->session()->put('device_trusted', true);
 
         return response()->json([
@@ -252,13 +270,13 @@ class AuthController extends Controller
             return redirect()->to('/login')->with('error', 'Tautan kedaluwarsa atau tidak valid.');
         }
 
-        $userId = $request->input('userId');
+        $userId = $request->route('userId');
         $user = User::findOrFail($userId);
 
         // 2. Simpan izin restriksi di session
         $request->session()->put('password_reset_allowed_id', $user->id);
 
-        return view('auth.reset-password', [
+        return view('auth.request-reset-password-form', [
             'userName' => $user->name,
             'userId' => $user->id,
         ]);
@@ -486,7 +504,7 @@ class AuthController extends Controller
         }
 
         $restaurant = Restaurant::query()->where('id', $user->restaurant_id)
-            ->select('id', 'restaurant_uid', 'pin', 'plan')
+            ->select('id', 'restaurant_uid', 'pin')
             ->first();
 
         if (!$restaurant) {
@@ -502,9 +520,6 @@ class AuthController extends Controller
         Auth::guard('restaurant')->login($restaurant);
 
         $request->session()->put('auth_uid', $restaurant->restaurant_uid);
-        $request->session()->put('restaurant_id', $restaurant->id);
-        $request->session()->put('restaurant_plan', $restaurant->plan);
-        $request->session()->put('plan', $restaurant->plan);
 
         // Arahkan ke rute berdasarkan role user saat ini
         $redirectUrl = match ($user->role) {

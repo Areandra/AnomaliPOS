@@ -2,7 +2,7 @@
 
     @slot('headerLinks')
         <a href="/menu"
-            class="flex items-center gap-2 px-4 py-2 rounded-full duration-300 font-black text-[10px] uppercase tracking-widest shadow-sm"
+            class="flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-sm duration-300"
             :class="isDark ? 'bg-slate-800 text-amber-500 hover:bg-slate-700 border border-white/5' :
                 'bg-white text-orange-600 hover:bg-orange-50 border border-gray-200'">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -34,6 +34,8 @@
 
         {{-- Active Order Panel --}}
         <x-active-order-panel :categories="$categoriesData" />
+
+        <x-receipt-modal />
 
     </div>
 
@@ -528,9 +530,25 @@
                         })
                     });
                     const data = await res.json();
+                    console.log(data)
                     if (!res.ok) throw new Error(data.message);
-                    this.selectedOrder = data.order ?? data;
+
+                    // Simpan data order terbaru dari response backend
+                    this.selectedOrder = data.order;
                     this.showPayment = false;
+
+                    // === TRIGGER STRUK / RECEIPT DI SINI ===
+                    if (window.Alpine && Alpine.store('receipt')) {
+                        Alpine.store('receipt').title = 'Payment Successfuly';
+                        Alpine.store('receipt').restaurant = data.restaurant_name;
+                        // Masukkan data transaksi/order ke store Alpine agar bisa dibaca receipt-modal
+                        Alpine.store('receipt').order = this.selectedOrder;
+                        Alpine.store('receipt').payment = data.payment;
+                        // Ubah state menjadi true agar modal struk langsung menyembul muncul
+                        Alpine.store('receipt').visible = true;
+                    }
+                    // =======================================
+
                 } catch (e) {
                     alert(e.message || 'Gagal memproses pembayaran');
                 } finally {

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('restaurant_id')->constrained();
             $table->foreignId('created_by')->constrained('users');
             $table->string('token');
+            $table->integer('guest')->nullable();
             $table->timestamp('started_at');
             $table->timestamp('ended_at')->nullable();
             $table->boolean('is_active')->default(true);

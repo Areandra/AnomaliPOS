@@ -1,126 +1,185 @@
-@extends('layouts.admin')
+@php
+    $tableData = $tables
+        ->map(
+            fn($t) => [
+                'id' => $t->id,
+                'tableNumber' => $t->table_number,
+                'capacity' => $t->capacity,
+                'status' => $t->status,
+                'facing' => $t->facing,
+                'vertical' => $t->vertical,
+                'positionX' => $t->position_x ?? 0,
+                'positionY' => $t->position_y ?? 0,
+            ],
+        )
+        ->values();
 
-@section('title', 'Manajemen Meja')
-@section('page_title', 'Management > Tables')
+    $tableMapProps = [
+        'table' => $tableData,
+        'drag' => false,
+        'editMode' => 'information',
+        'theme' => 'dark',
+    ];
+@endphp
 
-@section('content')
-<div x-data="tableIndex({{ json_encode($tables->map(fn($t) => ['id' => $t->id, 'tableNumber' => $t->table_number, 'capacity' => $t->capacity, 'status' => $t->status, 'facing' => $t->facing, 'vertical' => $t->vertical])->values()) }})"
-    x-init="$store.theme.init(); $nextTick(() => lucide.createIcons())"
-    class="h-full flex flex-col overflow-hidden">
+<x-admin-layout>
+    <x-slot name="title">Manajemen Meja</x-slot>
+    <x-slot name="page_title">Management > Tables</x-slot>
 
-    {{-- Header --}}
-    <div :class="$store.theme.isDark ? 'bg-slate-900/70 border-white/5' : 'bg-white/70 border-gray-200/50'"
-        class="sticky top-0 z-40 w-full px-8 py-4 backdrop-blur-xl border-b">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-6 w-full">
-            <div class="flex items-center gap-3">
-                <div :class="$store.theme.isDark ? 'bg-slate-800 text-amber-500' : 'bg-orange-100 text-orange-600'"
-                    class="p-2.5 rounded-xl">
-                    <i data-lucide="map" class="w-6 h-6"></i>
+    <div class="flex h-full flex-col overflow-hidden transition-colors duration-500"
+        :class="isDark ? 'bg-slate-950 text-gray-100' : 'bg-[#FDFBF7] text-gray-900'">
+
+        {{-- ── Background Glow ─────────────────────────────────────── --}}
+        <template x-if="isDark">
+            <div class="pointer-events-none fixed inset-0 opacity-20">
+                <div
+                    class="absolute left-0 top-0 h-[500px] w-[500px] rounded-full bg-indigo-900 mix-blend-screen blur-[120px]">
                 </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-none tracking-tight">Table Management</h1>
-                    <p :class="$store.theme.isDark ? 'text-gray-400' : 'text-gray-500'"
-                        class="text-[10px] mt-1 uppercase font-bold tracking-widest">Kelola meja restoran</p>
+                <div
+                    class="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-amber-900 mix-blend-screen blur-[120px]">
                 </div>
-            </div>
-            <div class="flex items-center gap-4 w-full md:w-auto">
-                <div :class="$store.theme.isDark ? 'bg-slate-900 border-white/10' : 'bg-white border-gray-200'"
-                    class="flex items-center gap-3 flex-1 p-3 px-5 border rounded-full shadow-sm">
-                    <i data-lucide="search" class="w-[18px] h-[18px] opacity-40"></i>
-                    <input type="text" x-model="search" placeholder="Cari nomor meja..."
-                        class="bg-transparent border-none outline-none w-full text-sm font-medium" />
-                </div>
-                <a href="{{ route('tables.create') }}"
-                    :class="$store.theme.isDark ? 'bg-white text-slate-950 hover:bg-gray-200' : 'bg-slate-900 text-white hover:bg-slate-800'"
-                    class="px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Tambah Meja
-                </a>
-            </div>
-        </div>
-    </div>
-
-    {{-- Flash --}}
-    @if(session('success'))
-    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
-        class="mx-8 mt-4 p-4 rounded-2xl bg-emerald-100 text-emerald-700 text-sm font-bold flex items-center gap-2">
-        <i data-lucide="check-circle" class="w-4 h-4"></i> {{ session('success') }}
-    </div>
-    @endif
-
-    {{-- Grid --}}
-    <div class="flex-1 overflow-y-auto p-8">
-        <template x-if="filtered.length === 0">
-            <div class="flex flex-col items-center justify-center py-32 opacity-30">
-                <i data-lucide="map" class="w-16 h-16 mb-4"></i>
-                <p class="font-black uppercase tracking-widest text-xs">Belum ada meja</p>
             </div>
         </template>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            <template x-for="t in filtered" :key="t.id">
-                <div :class="$store.theme.isDark ? 'bg-slate-900/50 border-white/5 hover:bg-slate-800' : 'bg-white border-gray-100 hover:shadow-xl'"
-                    class="group relative p-5 rounded-3xl border transition-all duration-300 hover:-translate-y-1 flex flex-col items-center gap-3">
+        {{-- ── Header ────────────────────────────────────────────────── --}}
+        <div class="sticky top-0 z-40 w-full border-b px-8 py-4 backdrop-blur-xl transition-all duration-300"
+            :class="isDark ?
+                'bg-slate-900/70 border-white/5' :
+                'bg-white/70 border-gray-200/50'">
+            <div class="mx-auto flex flex-col items-center justify-between gap-4 md:flex-row">
 
-                    <div :class="{
-                            'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400': t.status === 'available',
-                            'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400': t.status === 'occupied',
-                            'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400': t.status === 'waiting_payment'
-                        }"
-                        class="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest"
-                        x-text="t.status.replace('_', ' ')">
+                {{-- Title --}}
+                <div class="flex items-center gap-3">
+                    <div class="rounded-xl p-2.5"
+                        :class="isDark ?
+                            'bg-slate-800 text-amber-500 shadow-lg shadow-black/20' :
+                            'bg-orange-100 text-orange-600 shadow-sm'">
+                        <i data-lucide="map" class="h-5 w-5"></i>
                     </div>
-
-                    <div :class="$store.theme.isDark ? 'bg-slate-800 text-amber-500' : 'bg-orange-50 text-orange-600'"
-                        class="w-14 h-14 rounded-2xl flex items-center justify-center">
-                        <i data-lucide="armchair" class="w-7 h-7"></i>
-                    </div>
-
-                    <div class="text-center">
-                        <p :class="$store.theme.isDark ? 'text-white' : 'text-slate-800'"
-                            class="font-black text-sm uppercase tracking-tight" x-text="'Meja ' + t.tableNumber"></p>
-                        <p class="text-[10px] opacity-50 font-bold" x-text="t.capacity + ' kursi'"></p>
-                    </div>
-
-                    <div class="flex gap-2 w-full mt-1">
-                        <a :href="'/tables/' + t.id + '/edit'"
-                            :class="$store.theme.isDark ? 'bg-white/5 hover:bg-white/10 text-gray-300' : 'bg-gray-100 hover:bg-slate-900 hover:text-white text-slate-600'"
-                            class="flex-1 flex items-center justify-center py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">
-                            <i data-lucide="edit-3" class="w-3 h-3"></i>
-                        </a>
-                        <button @click="deleteTable(t.id)"
-                            class="flex-1 flex items-center justify-center py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white">
-                            <i data-lucide="trash-2" class="w-3 h-3"></i>
-                        </button>
+                    <div>
+                        <h1 class="text-lg font-bold leading-none tracking-tight">Table Management</h1>
+                        <p class="mt-1 text-[10px] font-bold uppercase tracking-widest"
+                            :class="isDark ? 'text-gray-400' : 'text-gray-500'">Map Editor System</p>
                     </div>
                 </div>
-            </template>
+
+                {{-- Actions --}}
+                <div class="flex items-center gap-3">
+
+                    {{-- Save Layout — muncul hanya jika ada perubahan --}}
+                    <div id="activity-wrapper" class="hidden">
+                        <button id="btn-save-layout"
+                            class="animate-pulse rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="save" class="h-4 w-4"></i>
+
+                                <span>SAVE LAYOUT</span>
+                            </div>
+                        </button>
+                    </div>
+                    <a href="{{ route('tables.create') }}"
+                        class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold shadow-lg transition-all active:scale-95"
+                        :class="isDark ?
+                            'bg-white text-slate-950 hover:bg-gray-200' :
+                            'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-200'">
+                        <i data-lucide="plus" class="h-4 w-4"></i> NEW TABLE
+                    </a>
+
+                    <button onclick="window.printTableMap()"
+                        class="rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-orange-500/20 transition-all active:scale-95">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="map" class="h-4 w-4"></i>
+
+                            <span>PRINT LAYOUT</span>
+                        </div>
+                    </button>
+
+                    <button @click="$store.theme.toggle(); $nextTick(() => { lucide.createIcons(); renderMap(); })"
+                        class="rounded-full p-2 transition-transform hover:scale-110 active:rotate-90"
+                        :class="isDark ?
+                            'text-amber-400 hover:bg-slate-800' :
+                            'text-slate-600 hover:bg-white shadow-sm'">
+                        <i :data-lucide="isDark ? 'sun' : 'moon'" class="h-4 w-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- ── Flash ──────────────────────────────────────────────────── --}}
+        @if (session('success'))
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
+                class="mx-8 mt-4 flex items-center gap-2 rounded-2xl bg-emerald-100 p-4 text-sm font-bold text-emerald-700">
+                <i data-lucide="check-circle" class="h-4 w-4"></i>
+                {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- ── Canvas Area ─────────────────────────────────────────────── --}}
+        <div class="relative flex-1 overflow-hidden transition-colors duration-500"
+            :class="isDark ? 'bg-slate-950' : 'bg-slate-100'">
+            <div id="table-map-react" data-props='@json($tableMapProps)' class="h-full w-full"></div>
         </div>
     </div>
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const wrapper = document.getElementById('activity-wrapper');
+            const button = document.getElementById('btn-save-layout');
 
-<script>
-function tableIndex(tables) {
-    return {
-        tables,
-        search: '',
-        get filtered() {
-            return this.tables.filter(t =>
-                t.tableNumber.toString().toLowerCase().includes(this.search.toLowerCase())
-            )
-        },
-        async deleteTable(id) {
-            if (!confirm('Hapus meja ini?')) return
-            const form = document.createElement('form')
-            form.method = 'POST'
-            form.action = `/tables/${id}`
-            form.innerHTML = `
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="_method" value="DELETE">
-            `
-            document.body.appendChild(form)
-            form.submit()
-        }
-    }
-}
-</script>
-@endsection
+            // 1. Dengarkan update data dari React
+            window.addEventListener('reactLayoutUpdated', (e) => {
+                const {
+                    isTableLayoutChanged
+                } = e.detail;
+
+                console.log(window.newTablesData)
+
+
+                // Tampilkan/sembunyikan wrapper button mirip seperti tag <Activity>
+                if (isTableLayoutChanged) {
+                    wrapper.classList.remove('hidden');
+                } else {
+                    wrapper.classList.add('hidden');
+                }
+            });
+
+            // 2. Aksi saat tombol di Blade diklik
+            button.addEventListener('click', () => {
+                // Ambil data terbaru yang sudah ditaruh React di window object
+                const latestData = window.newTablesData;
+
+
+                if (latestData && window.isTableLayoutChanged) {
+                    // Karena Anda menggunakan Inertia, panggil router globalnya via window
+                    // Pastikan @inertiaHead / @inertia sudah meload core Inertia ke window
+                    if (window.Inertia) {
+                        window.Inertia.post('/table/update-layout', {
+                            tables: latestData
+                        });
+                    } else if (window.modules && window.modules.router) {
+                        // Jika Anda mengekspos router Inertia v6 secara custom
+                        window.modules.router.post('/table/update-layout', {
+                            tables: latestData
+                        });
+                    } else {
+                        // Alternatif fallback jika object Inertia global tidak terikat:
+                        // Menggunakan fetch bawaan browser (tetap mengarah ke controller yang sama)
+                        fetch('/table/update-layout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content,
+                            },
+                            body: JSON.stringify({
+                                tables: latestData
+                            })
+                        }).then(() => {
+                            window.location.reload(); // Refresh halaman setelah sukses
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+
+</x-admin-layout>

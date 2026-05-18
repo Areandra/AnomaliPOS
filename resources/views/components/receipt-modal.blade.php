@@ -5,7 +5,7 @@
     class="fixed h-[100dvh] inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center z-50 py-8"
 >
     <div
-        :class="$store.theme.isDark ? 'bg-slate-900 border-white/10' : 'bg-white border-gray-100'"
+        :class="isDark ? 'bg-slate-900 border-white/10' : 'bg-white border-gray-100'"
         class="relative w-full h-full pb-64 max-w-sm rounded-[2.5rem] shadow-2xl overflow-hidden border"
     >
         {{-- Header --}}
@@ -15,7 +15,7 @@
                     <i data-lucide="check-circle-2" class="w-20 h-20 text-emerald-500"></i>
                 </div>
             </div>
-            <h2 :class="$store.theme.isDark ? 'text-white' : 'text-slate-900'"
+            <h2 :class="isDark ? 'text-white' : 'text-slate-900'"
                 class="text-xl font-black uppercase tracking-tight"
                 x-text="$store.receipt.title || 'Payment Success'"></h2>
             <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Transaction has been finalized</p>
@@ -30,7 +30,7 @@
                 <div class="text-center mb-4">
                     <h3 class="font-bold text-lg leading-none mb-1"
                         x-text="($store.receipt.restaurant || '').toUpperCase()"></h3>
-                    <p class="text-[10px] uppercase" x-text="$store.receipt.order?.orderCode"></p>
+                    <p class="text-[10px] uppercase" x-text="$store.receipt.order?.order_code"></p>
                 </div>
 
                 <div class="border-t border-dashed border-slate-300 my-3"></div>
@@ -42,11 +42,11 @@
                     </div>
                     <div class="flex justify-between">
                         <span>CASHIER</span>
-                        <span class="font-bold uppercase" x-text="$store.receipt.payment?.createdBy?.name"></span>
+                        <span class="font-bold uppercase" x-text="$store.receipt.payment?.created_by?.name"></span>
                     </div>
                     <div class="flex justify-between">
                         <span>DATE</span>
-                        <span x-text="$store.receipt.payment ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date($store.receipt.payment.createdAt)) : ''"></span>
+                        <span x-text="$store.receipt.payment ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date($store.receipt.payment.created_at)) : ''"></span>
                     </div>
                 </div>
 
@@ -56,7 +56,7 @@
                     <template x-for="item in ($store.receipt.order?.items || [])" :key="item.id">
                         <div class="text-[11px]">
                             <div class="flex justify-between font-bold">
-                                <span class="uppercase" x-text="item.menuItem.name"></span>
+                                <span class="uppercase" x-text="item.menu_item.name"></span>
                                 <span x-text="formatRp(item.quantity * item.price)"></span>
                             </div>
                             <div class="text-[10px] opacity-60">
@@ -99,15 +99,15 @@
         </div>
 
         {{-- Actions --}}
-        <div :class="$store.theme.isDark ? 'bg-slate-900' : 'bg-white'" class="p-8 pt-4 flex gap-4">
+        <div :class="isDark ? 'bg-slate-900' : 'bg-white'" class="p-8 pt-4 flex gap-4">
             <button @click="printReceipt()"
-                :class="$store.theme.isDark ? 'bg-amber-500 text-slate-950 hover:bg-amber-400' : 'bg-slate-900 text-white hover:bg-slate-800'"
+                :class="isDark ? 'bg-amber-500 text-slate-950 hover:bg-amber-400' : 'bg-slate-900 text-white hover:bg-slate-800'"
                 class="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95">
                 <i data-lucide="printer" class="w-4 h-4"></i>
                 Print Struk
             </button>
             <button @click="$store.receipt.close()"
-                :class="$store.theme.isDark ? 'bg-white/5 text-gray-400 hover:bg-white/10' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+                :class="isDark ? 'bg-white/5 text-gray-400 hover:bg-white/10' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
                 class="px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
                 Close
             </button>

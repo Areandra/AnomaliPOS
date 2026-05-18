@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToRestaurant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TrustedDevice extends Model
 {
+    use BelongsToRestaurant;
     // Override karena nama tabel menggunakan huruf 'i' (trusted_divices)
     protected $table = 'trusted_divices';
     protected $guarded = ['id'];

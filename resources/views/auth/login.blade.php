@@ -3,63 +3,70 @@
     @include('components.device-detected-modal')
 
     <div x-data="loginForm()">
+        {{-- SECTION: System Access --}}
+        <div class="mb-4 flex items-center gap-2">
+            <div class="h-px flex-1 bg-white/5"></div>
+            <span class="px-2 text-[9px] font-black uppercase tracking-[0.3em] text-amber-500/70">System Access</span>
+            <div class="h-px flex-1 bg-white/5"></div>
+        </div>
+
         {{-- Email --}}
-        <div class="space-y-2 mb-5">
-            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">
+        <div class="mb-4 space-y-2">
+            <label class="ml-1 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                 System Identifier / Email
             </label>
-            <div class="relative group">
+            <div class="group relative">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-amber-500 transition-colors">
-                    <i data-lucide="mail" class="w-[18px] h-[18px]"></i>
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <i data-lucide="mail" class="h-[18px] w-[18px]"></i>
                 </div>
                 <input type="email" x-model="form.email" placeholder="example@anopos.sys"
-                    class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-white font-medium placeholder:text-gray-700 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5 transition-all" />
+                    class="w-full rounded-2xl border border-white/5 bg-slate-950/50 py-4 pl-12 pr-4 font-medium text-white outline-none transition-all placeholder:text-gray-700 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5" />
             </div>
             <template x-if="errors.email">
-                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter" x-text="errors.email">
+                <p class="ml-1 text-[10px] font-black uppercase tracking-tighter text-red-500" x-text="errors.email">
                 </p>
             </template>
         </div>
 
         {{-- Password --}}
-        <div class="space-y-2 mb-6">
-            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 ml-1">
+        <div class="mb-6 space-y-2">
+            <label class="ml-1 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                 Access Key / Password
             </label>
-            <div class="relative group">
+            <div class="group relative">
                 <div
-                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-amber-500 transition-colors">
-                    <i data-lucide="lock" class="w-[18px] h-[18px]"></i>
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 transition-colors group-focus-within:text-amber-500">
+                    <i data-lucide="lock" class="h-[18px] w-[18px]"></i>
                 </div>
                 <input :type="showPassword ? 'text' : 'password'" x-model="form.password" placeholder="••••••••"
-                    class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-12 rounded-2xl text-white font-medium placeholder:text-gray-700 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5 transition-all" />
+                    class="w-full rounded-2xl border border-white/5 bg-slate-950/50 py-4 pl-12 pr-12 font-medium text-white outline-none transition-all placeholder:text-gray-700 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/5" />
                 <button type="button" @click="showPassword = !showPassword"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-amber-500 transition-colors">
+                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 transition-colors hover:text-amber-500">
                     <template x-if="showPassword">
-                        <i data-lucide="eye-off" class="w-[18px] h-[18px]"></i>
+                        <i data-lucide="eye-off" class="h-[18px] w-[18px]"></i>
                     </template>
                     <template x-if="!showPassword">
-                        <i data-lucide="eye" class="w-[18px] h-[18px]"></i>
+                        <i data-lucide="eye" class="h-[18px] w-[18px]"></i>
                     </template>
                 </button>
             </div>
             <template x-if="errors.password">
-                <p class="text-[10px] font-black uppercase text-red-500 ml-1 tracking-tighter" x-text="errors.password">
+                <p class="ml-1 text-[10px] font-black uppercase tracking-tighter text-red-500" x-text="errors.password">
                 </p>
             </template>
         </div>
 
         {{-- Actions --}}
-        <div class="flex items-center justify-between px-1 mb-6">
-            <label class="flex items-center gap-3 cursor-pointer group">
+        <div class="mb-6 flex items-center justify-between px-1">
+            <label class="group flex cursor-pointer items-center gap-3">
                 <div class="relative flex items-center">
                     <input type="checkbox" x-model="form.remember"
-                        class="peer h-5 w-5 opacity-0 absolute cursor-pointer" />
+                        class="peer absolute h-5 w-5 cursor-pointer opacity-0" />
                     <div
-                        class="h-5 w-5 rounded-md border border-white/10 bg-slate-950 peer-checked:bg-amber-500 peer-checked:border-amber-500 transition-all">
+                        class="h-5 w-5 rounded-md border border-white/10 bg-slate-950 transition-all peer-checked:border-amber-500 peer-checked:bg-amber-500">
                     </div>
-                    <div class="absolute text-slate-950 opacity-0 peer-checked:opacity-100 left-1 transition-opacity">
+                    <div class="absolute left-1 text-slate-950 opacity-0 transition-opacity peer-checked:opacity-100">
                         <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
                             <path d="M1 5L4 8L11 1" stroke="currentColor" stroke-width="3" stroke-linecap="round"
                                 stroke-linejoin="round" />
@@ -67,21 +74,21 @@
                     </div>
                 </div>
                 <span
-                    class="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-gray-300 transition-colors">Keep
+                    class="text-[10px] font-black uppercase tracking-widest text-gray-500 transition-colors group-hover:text-gray-300">Keep
                     Active</span>
             </label>
             <a href="{{ route('request-change-password-form') }}"
-                class="text-[10px] font-black uppercase tracking-widest text-amber-500/50 hover:text-amber-500 transition-colors">
+                class="text-[10px] font-black uppercase tracking-widest text-amber-500/50 transition-colors hover:text-amber-500">
                 Forgot Key?
             </a>
         </div>
 
         {{-- Submit --}}
         <button type="button" @click="submit" :disabled="processing"
-            class="w-full py-5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 shadow-xl shadow-amber-500/20">
+            class="flex w-full items-center justify-center gap-3 rounded-2xl bg-amber-500 py-5 text-xs font-black uppercase tracking-[0.2em] text-slate-950 shadow-xl shadow-amber-500/20 transition-all hover:bg-amber-400 active:scale-95 disabled:opacity-50">
             <template x-if="processing">
                 <span class="flex items-center gap-3">
-                    <svg class="animate-spin w-[18px] h-[18px]" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    <svg class="h-[18px] w-[18px] animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                             stroke-width="4"></circle>
@@ -94,7 +101,7 @@
             <template x-if="!processing">
                 <span class="flex items-center gap-3">
                     Grant Access
-                    <i data-lucide="arrow-right" class="w-[18px] h-[18px]"></i>
+                    <i data-lucide="arrow-right" class="h-[18px] w-[18px]"></i>
                 </span>
             </template>
         </button>
@@ -128,9 +135,10 @@
                             body: JSON.stringify(this.form)
                         })
 
+                        const data = await res.json()
+
                         if (!res.ok) {
-                            const data = await res.json()
-                            this.handleError(data.code)
+                            this.handleError(data.code, data.errors)
                             return
                         }
 
@@ -145,7 +153,11 @@
                     }
                 },
 
-                handleError(code) {
+                handleError(code, validationErrors) {
+                    if (validationErrors) {
+                        this.errors = validationErrors
+                    }
+
                     const messages = {
                         'invalid_credential': 'Email atau Password anda Salah',
                         'disabled': 'Akun Telah dinonaktifkan',
@@ -166,9 +178,9 @@
     </script>
 
     @slot('footerLink')
-        <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest">
+        <p class="text-[10px] font-black uppercase tracking-widest text-gray-600">
             Belum punya akun?
-            <a href="/register" class="text-amber-500 hover:text-amber-400 transition-colors ml-1">Daftar Sekarang</a>
+            <a href="/register" class="ml-1 text-amber-500 transition-colors hover:text-amber-400">Daftar Sekarang</a>
         </p>
     @endslot
 

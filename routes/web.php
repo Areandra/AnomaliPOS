@@ -41,44 +41,6 @@ Route::get('/dashboard', [DashboardController::class, 'index']);
 Route::redirect('/menu', '/menu/items');
 Route::redirect('/shift', '/shifts');
 
-Route::middleware(['auth', 'auth.restaurant'])->group(function () {
-    // ========================================================================
-    // CASHIER ROUTES
-    // ========================================================================
-
-    Route::get('/cashier', [CashierController::class, 'index'])
-        ->name('cashier.index');
-
-    Route::get('/cashier/order/start', [CashierController::class, 'start'])
-        ->name('cashier.order.start');
-
-    // ========================================================================
-    // SHIFT API
-    // ========================================================================
-
-    Route::post('/shifts/open',  [ShiftController::class, 'open'])->name('shifts.open');
-    Route::post('/shifts/close', [ShiftController::class, 'close'])->name('shifts.close');
-
-    // ========================================================================
-    // ORDER API
-    // ========================================================================
-
-    Route::post('/order',                    [OrderController::class, 'store']);
-    Route::get('/order/{id}',                [OrderController::class, 'show']);
-    Route::post('/order/add-item',           [OrderController::class, 'addItem']);
-    Route::post('/order/update-qty',         [OrderController::class, 'updateQty']);
-    Route::post('/order/delete-item',        [OrderController::class, 'deleteItem']);
-    Route::post('/order/place-order/{id}',   [OrderController::class, 'placeOrder']);
-    Route::post('/order/{id}/notes',         [OrderController::class, 'makeNotes']);
-    Route::post('/session/{token}/end',      [OrderController::class, 'endSession']);
-
-    // ========================================================================
-    // PAYMENT API
-    // ========================================================================
-
-    Route::post('/payments', [PaymentController::class, 'store']);
-});
-
 // ========================================================================
 // LOGIN USER
 // ========================================================================
@@ -185,106 +147,146 @@ Route::prefix('request-change-password')->group(function () {
 
 Route::get('/change-password', [AuthController::class, 'showChangePassword'])->name('change-password');
 
-// ========================================================================
-// USER MANAGEMENT
-// ========================================================================
+Route::middleware(['auth', 'auth.restaurant', 'tenant.context'])->group(function () {
 
-Route::middleware([
-    'auth',
-    'auth.restaurant',
-    'plan.acsess'
-])->group(function () {
+    // ========================================================================
+    // USER MANAGEMENT
+    // ========================================================================
 
-    Route::get('/users', [
-        UserController::class,
-        'index'
-    ])->name('users.index');
+    Route::middleware([
+        'plan.acsess'
+    ])->group(function () {
 
-    Route::get('/users/create', [
-        UserController::class,
-        'show'
-    ])->defaults('id', 'create')
-        ->name('users.create');
+        Route::get('/users', [
+            UserController::class,
+            'index'
+        ])->name('users.index');
 
-    Route::post('/users', [
-        UserController::class,
-        'store'
-    ])->name('users.store');
+        Route::get('/users/create', [
+            UserController::class,
+            'show'
+        ])->defaults('id', 'create')
+            ->name('users.create');
 
-    Route::get('/users/{id}/edit', [
-        UserController::class,
-        'show'
-    ])->name('users.edit');
+        Route::post('/users', [
+            UserController::class,
+            'store'
+        ])->name('users.store');
 
-    Route::put('/users/{id}', [
-        UserController::class,
-        'update'
-    ])->name('users.update');
+        Route::get('/users/{id}/edit', [
+            UserController::class,
+            'show'
+        ])->name('users.edit');
 
-    Route::delete('/users/{id}', [
-        UserController::class,
-        'destroy'
-    ])->name('users.destroy');
+        Route::put('/users/{id}', [
+            UserController::class,
+            'update'
+        ])->name('users.update');
 
-    Route::post('/users/{id}/toggle-status', [
-        UserController::class,
-        'toggleStatus'
-    ])->name('users.toggle-status');
+        Route::delete('/users/{id}', [
+            UserController::class,
+            'destroy'
+        ])->name('users.destroy');
 
-    Route::put('/users/{id}/password', [
-        UserController::class,
-        'updatePassword'
-    ])->name('users.update-password');
-});
+        Route::post('/users/{id}/toggle-status', [
+            UserController::class,
+            'toggleStatus'
+        ])->name('users.toggle-status');
 
-// ========================================================================
-// TABLE CRUD
-// ========================================================================
+        Route::put('/users/{id}/password', [
+            UserController::class,
+            'updatePassword'
+        ])->name('users.update-password');
+    });
 
-Route::middleware(['auth', 'auth.restaurant', 'plan.acsess'])->group(function () {
-    Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
-    Route::get('/tables/create', [TableController::class, 'create'])->name('tables.create');
-    Route::post('/tables', [TableController::class, 'store'])->name('tables.store');
-    Route::get('/tables/{id}/edit', [TableController::class, 'edit'])->name('tables.edit');
-    Route::put('/tables/{id}', [TableController::class, 'update'])->name('tables.update');
-    Route::delete('/tables/{id}', [TableController::class, 'destroy'])->name('tables.destroy');
-});
+    // ========================================================================
+    // TABLE CRUD
+    // ========================================================================
 
-// ========================================================================
-// MENU CATEGORY CRUD
-// ========================================================================
+    Route::middleware(['plan.acsess'])->group(function () {
+        Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
+        Route::get('/tables/create', [TableController::class, 'create'])->name('tables.create');
+        Route::post('/tables', [TableController::class, 'store'])->name('tables.store');
+        Route::get('/tables/{id}/edit', [TableController::class, 'edit'])->name('tables.edit');
+        Route::put('/tables/{id}', [TableController::class, 'update'])->name('tables.update');
+        Route::delete('/tables/{id}', [TableController::class, 'destroy'])->name('tables.destroy');
+        Route::post('/table/update-layout', [TableController::class, 'updateLayout'])->name('tables.update-layout');
+    });
 
-Route::middleware(['auth', 'auth.restaurant', 'plan.acsess'])->group(function () {
-    Route::get('/menu/categories', [MenuCategoryController::class, 'index'])->name('menu.categories.index');
-    Route::get('/menu/categories/create', [MenuCategoryController::class, 'create'])->name('menu.categories.create');
-    Route::post('/menu/categories', [MenuCategoryController::class, 'store'])->name('menu.categories.store');
-    Route::get('/menu/categories/{id}/edit', [MenuCategoryController::class, 'edit'])->name('menu.categories.edit');
-    Route::put('/menu/categories/{id}', [MenuCategoryController::class, 'update'])->name('menu.categories.update');
-    Route::delete('/menu/categories/{id}', [MenuCategoryController::class, 'destroy'])->name('menu.categories.destroy');
-});
+    // ========================================================================
+    // MENU CATEGORY CRUD
+    // ========================================================================
 
-// ========================================================================
-// MENU ITEM CRUD
-// ========================================================================
+    Route::middleware(['plan.acsess'])->group(function () {
+        // Route::get('/menu/categories', [MenuCategoryController::class, 'index'])->name('menu.categories.index');
+        Route::get('/menu/categories/create', [MenuCategoryController::class, 'create'])->name('menu.categories.create');
+        Route::post('/menu/categories', [MenuCategoryController::class, 'store'])->name('menu.categories.store');
+        Route::get('/menu/categories/{id}/edit', [MenuCategoryController::class, 'edit'])->name('menu.categories.edit');
+        Route::put('/menu/categories/{id}', [MenuCategoryController::class, 'update'])->name('menu.categories.update');
+        Route::delete('/menu/categories/{id}', [MenuCategoryController::class, 'destroy'])->name('menu.categories.destroy');
+    });
 
-Route::middleware(['auth', 'auth.restaurant', 'plan.acsess'])->group(function () {
-    Route::get('/menu/items', [MenuItemController::class, 'index'])->name('menu.items.index');
-    Route::get('/menu/items/create', [MenuItemController::class, 'create'])->name('menu.items.create');
-    Route::post('/menu/items', [MenuItemController::class, 'store'])->name('menu.items.store');
-    Route::get('/menu/items/{id}/edit', [MenuItemController::class, 'edit'])->name('menu.items.edit');
-    Route::put('/menu/items/{id}', [MenuItemController::class, 'update'])->name('menu.items.update');
-    Route::delete('/menu/items/{id}', [MenuItemController::class, 'destroy'])->name('menu.items.destroy');
-    Route::post('/menu/items/{id}/toggle-available', [MenuItemController::class, 'toggleAvailable'])->name('menu.items.toggle-available');
-});
+    // ========================================================================
+    // MENU ITEM CRUD
+    // ========================================================================
 
-// ========================================================================
-// SHIFT CRUD
-// ========================================================================
+    Route::middleware(['plan.acsess'])->group(function () {
+        Route::get('/menu/items', [MenuItemController::class, 'index'])->name('menu.items.index');
+        Route::get('/menu/items/create', [MenuItemController::class, 'create'])->name('menu.items.create');
+        Route::post('/menu/items', [MenuItemController::class, 'store'])->name('menu.items.store');
+        Route::get('/menu/items/{id}/edit', [MenuItemController::class, 'edit'])->name('menu.items.edit');
+        Route::put('/menu/items/{id}', [MenuItemController::class, 'update'])->name('menu.items.update');
+        Route::delete('/menu/items/{id}', [MenuItemController::class, 'destroy'])->name('menu.items.destroy');
+        Route::post('/menu/items/{id}/toggle-available', [MenuItemController::class, 'toggleAvailable'])->name('menu.items.toggle-available');
+    });
 
-Route::middleware(['auth', 'auth.restaurant', 'plan.acsess'])->group(function () {
-    Route::get('/shifts', [ShiftController::class, 'history'])->name('shifts.index');
-    Route::get('/shifts/{id}', [ShiftController::class, 'show'])->name('shifts.show');
-    Route::delete('/shifts/{id}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
-    Route::get('/shifts/me', [ShiftController::class, 'historyMe'])->name('shifts.me');
-    Route::get('/attendance/me', [ShiftController::class, 'attendenceMe'])->name('attendance.me');
+    // ========================================================================
+    // SHIFT CRUD
+    // ========================================================================
+
+    Route::middleware(['plan.acsess'])->group(function () {
+        Route::get('/shifts', [ShiftController::class, 'history'])->name('shifts.index');
+        Route::get('/shifts/{id}', [ShiftController::class, 'show'])->name('shifts.show');
+        Route::delete('/shifts/{id}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
+        Route::get('/shifts/me', [ShiftController::class, 'historyMe'])->name('shifts.me');
+        Route::get('/attendance/me', [ShiftController::class, 'attendenceMe'])->name('attendance.me');
+    });
+
+    Route::middleware(['plan.acsess'])->group(function () {
+        // ========================================================================
+        // CASHIER ROUTES
+        // ========================================================================
+
+        Route::get('/cashier', [CashierController::class, 'index'])
+            ->name('cashier.index');
+
+        Route::get('/cashier/order/start', [CashierController::class, 'start'])
+            ->name('cashier.order.start');
+
+        // ========================================================================
+        // SHIFT API
+        // ========================================================================
+
+        Route::post('/shifts/open',  [ShiftController::class, 'open'])->name('shifts.open');
+        Route::post('/shifts/close', [ShiftController::class, 'close'])->name('shifts.close');
+
+        // ========================================================================
+        // ORDER API
+        // ========================================================================
+
+        Route::post('/order',                    [OrderController::class, 'store']);
+        Route::get('/order/{id}',                [OrderController::class, 'show']);
+        Route::post('/order/add-item',           [OrderController::class, 'addItem']);
+        Route::post('/order/update-qty',         [OrderController::class, 'updateQty']);
+        Route::post('/order/delete-item',        [OrderController::class, 'deleteItem']);
+        Route::post('/order/place-order/{id}',   [OrderController::class, 'placeOrder']);
+        Route::post('/order/{id}/notes',         [OrderController::class, 'makeNotes']);
+        Route::post('/session/{token}/end',      [OrderController::class, 'endSession']);
+
+        // ========================================================================
+        // PAYMENT API
+        // ========================================================================
+
+        Route::post('/payments', [PaymentController::class, 'store']);
+    });
 });

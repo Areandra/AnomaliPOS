@@ -70,16 +70,14 @@ class OrderController extends Controller
     }
 
     // POST /api/order
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
-        $restaurantId = session('restaurant_id');
         $plan         = session('restaurant_plan', 'starter');
         $userId       = Auth::guard('web')->user()->id;
 
         // Starter plan: buat order kosong tanpa meja
         if ($plan === 'starter') {
             $order = Order::create([
-                'restaurant_id' => $restaurantId,
                 'order_code'    => 'ORD-' . time(),
                 'type'          => 'dine_in',
                 'status'        => 'pending',
@@ -98,14 +96,13 @@ class OrderController extends Controller
         $table = Table::findOrFail($tableId);
 
         // Cek apakah ada session aktif
-        $session = TableSession::where('table_id', $tableId)
+        $session = TableSession::query()->where('table_id', $tableId)
             ->where('is_active', true)
             ->first();
 
         if ($session) {
             // Session aktif — buat order baru di session yang sama
             $order = Order::create([
-                'restaurant_id'    => $restaurantId,
                 'table_id'         => $tableId,
                 'table_session_id' => $session->id,
                 'order_code'       => 'ORD-' . time(),
@@ -120,7 +117,6 @@ class OrderController extends Controller
             // Buat session baru
             $session = TableSession::create([
                 'table_id'      => $tableId,
-                'restaurant_id' => $restaurantId,
                 'created_by'    => $userId,
                 'token'         => Str::uuid(),
                 'started_at'    => now(),
@@ -133,7 +129,7 @@ class OrderController extends Controller
             ]);
 
             $order = Order::create([
-                'restaurant_id'    => $restaurantId,
+
                 'table_id'         => $tableId,
                 'table_session_id' => $session->id,
                 'order_code'       => 'ORD-' . time(),
@@ -146,7 +142,7 @@ class OrderController extends Controller
             ]);
         }
 
-        return response()->json(['redirect' => '/cashier']);
+        return response()->redirectToRoute('cashier.index');
     }
 
     // POST /api/order/add-item
@@ -165,7 +161,7 @@ class OrderController extends Controller
 
         OrderItem::create([
             'order_id'      => $orderId,
-            'restaurant_id' => session('restaurant_id'),
+            'restaurant_id' => Auth::guard('restaurant')->user()->id,
             'menu_item_id'  => $menuItemId,
             'quantity'      => $qty,
             'price'         => $menu->price,
@@ -182,7 +178,7 @@ class OrderController extends Controller
         $itemId = $request->input('itemId');
         $qty    = $request->input('qty');
 
-        $item = OrderItem::where('id', $itemId)->where('status', 'cart')->firstOrFail();
+        $item = OrderItem::query()->where('id', $itemId)->where('status', 'cart')->firstOrFail();
         $item->update([
             'quantity' => $qty,
             'subtotal' => $qty * $item->price,
@@ -195,7 +191,7 @@ class OrderController extends Controller
     public function deleteItem(Request $request): JsonResponse
     {
         $itemId  = $request->input('itemId');
-        $item    = OrderItem::where('id', $itemId)->where('status', 'cart')->firstOrFail();
+        $item    = OrderItem::query()->where('id', $itemId)->where('status', 'cart')->firstOrFail();
         $orderId = $item->order_id;
         $item->delete();
 
@@ -206,7 +202,7 @@ class OrderController extends Controller
     public function placeOrder(int $id): JsonResponse
     {
         $plan      = session('restaurant_plan', 'starter');
-        $cartItems = OrderItem::where('order_id', $id)->where('status', 'cart')->get();
+        $cartItems = OrderItem::query()->where('order_id', $id)->where('status', 'cart')->get();
 
         if ($cartItems->isEmpty()) {
             return response()->json(['error' => 'Cart kosong'], 400);
@@ -214,7 +210,7 @@ class OrderController extends Controller
 
         $this->recalculate($id);
 
-        OrderItem::where('order_id', $id)->where('status', 'cart')->update(['status' => 'ordered']);
+        OrderItem::query()->where('order_id', $id)->where('status', 'cart')->update(['status' => 'ordered']);
 
         $order         = Order::findOrFail($id);
         $order->status = $plan !== 'starter' ? 'cooking' : 'served';
@@ -223,6 +219,7 @@ class OrderController extends Controller
         if ($plan !== 'starter') {
             $kots = $cartItems->map(fn($i) => [
                 'order_id'      => $id,
+                'restaurant_id' => Auth::guard('restaurant')->user()->id,
                 'order_item_id' => $i->id,
                 'kot_number'    => 'KOT-' . time(),
                 'section'       => 'kitchen',
@@ -244,7 +241,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'Notes tidak boleh kosong'], 400);
         }
 
-        $item = OrderItem::where('id', $id)
+        $item = OrderItem::query()->where('id', $id)
             ->whereIn('status', ['cart', 'ordered'])
             ->firstOrFail();
 
@@ -256,9 +253,9 @@ class OrderController extends Controller
     // POST /api/session/{token}/end
     public function endSession(string $token): JsonResponse
     {
-        $session = TableSession::where('token', $token)->firstOrFail();
+        $session = TableSession::query()->where('token', $token)->firstOrFail();
 
-        $table = Table::where('current_table_session_id', $session->id)->first();
+        $table = Table::query()->where('current_table_session_id', $session->id)->first();
         if ($table) {
             $table->update([
                 'status'                   => 'available',
@@ -274,7 +271,7 @@ class OrderController extends Controller
     private function recalculate(int $orderId): void
     {
         $order    = Order::findOrFail($orderId);
-        $cartSub  = OrderItem::where('order_id', $orderId)->where('status', 'cart')->sum('subtotal');
+        $cartSub  = OrderItem::query()->where('order_id', $orderId)->where('status', 'cart')->sum('subtotal');
         $subtotal = (float) $order->subtotal + (float) $cartSub;
         $tax      = $subtotal * 0.1;
 

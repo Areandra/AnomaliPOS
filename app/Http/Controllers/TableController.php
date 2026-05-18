@@ -7,14 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TableController extends Controller
 {
     public function index(): View
     {
-        $restaurantId = Auth::guard('restaurant')->user()->id;
-
-        $tables = Table::where('restaurant_id', $restaurantId)
+        $tables = Table::query()->select('*')
             ->orderBy('table_number')
             ->get();
 
@@ -55,7 +54,7 @@ class TableController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $table = Table::where('id', $id)
+        $table = Table::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
@@ -66,7 +65,7 @@ class TableController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $table = Table::where('id', $id)
+        $table = Table::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
@@ -93,12 +92,31 @@ class TableController extends Controller
     {
         $restaurantId = Auth::guard('restaurant')->user()->id;
 
-        $table = Table::where('id', $id)
+        $table = Table::query()->where('id', $id)
             ->where('restaurant_id', $restaurantId)
             ->firstOrFail();
 
         $table->delete();
 
         return redirect()->route('tables.index')->with('success', 'Meja berhasil dihapus.');
+    }
+
+    public function updateLayout(Request $request)
+    {
+        $tables = $request->input('tables', []);
+
+        DB::transaction(function () use ($tables) {
+            foreach ($tables as $item) {
+                Table::where('table_number', $item['tableNumber'])
+                    ->update([
+                        'position_x' => $item['positionX'],
+                        'position_y' => $item['positionY'],
+                        'facing'     => $item['facing'],
+                        'vertical'   => $item['vertical'],
+                    ]);
+            }
+        });
+
+        return redirect('/table');
     }
 }

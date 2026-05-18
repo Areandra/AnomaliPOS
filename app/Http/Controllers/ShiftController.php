@@ -127,9 +127,9 @@ class ShiftController extends Controller
     {
         $shift = Shift::with([
             'user',
-            'restaurant:id,name',
             'payments.createdBy',
             'payments.order.items.menuItem',
+            'restaurant'
         ])
             ->where('id', $id)
             ->where('status', 'closed')

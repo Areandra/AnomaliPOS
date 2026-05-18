@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToRestaurant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
+    use BelongsToRestaurant;
+
     protected $guarded = ['id'];
 
     protected $fillable = [
