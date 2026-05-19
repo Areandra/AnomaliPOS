@@ -86,6 +86,106 @@
         }
 
         document.addEventListener('alpine:init', () => {
+            Alpine.data('qrModalData', (orderData) => ({
+                isOpen: true, // Anda bisa set false jika ingin dibuka lewat event browser
+                order: orderData,
+                qrDataUrl: '',
+
+                init() {
+                    // Otomatis men-generate QR Code saat modal muncul/di-init
+                    if (!this.order?.session?.sessionToken) return;
+
+                    const token = this.order.session.sessionToken;
+                    const url =
+                        `${window.location.protocol}//${window.location.host}/order/session/${token}`;
+
+                    QRCode.toDataURL(url, {
+                        errorCorrectionLevel: 'M',
+                        margin: 4,
+                        width: 220,
+                        color: {
+                            dark: '#000000',
+                            light: '#ffffff',
+                        }
+                    }, (err, dataUrl) => {
+                        if (!err) {
+                            this.qrDataUrl = dataUrl;
+                        } else {
+                            console.error('QR Generation Error:', err);
+                        }
+                    });
+                },
+
+                formatDate(dateString) {
+                    if (!dateString) return '';
+                    return new Intl.DateTimeFormat('id-ID', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                    }).format(new Date(dateString));
+                },
+
+                printQR() {
+                    let iframe = document.getElementById('print-iframe');
+                    if (!iframe) {
+                        iframe = document.createElement('iframe');
+                        iframe.id = 'print-iframe';
+                        Object.assign(iframe.style, {
+                            position: 'absolute',
+                            width: '0px',
+                            height: '0px',
+                            border: 'none',
+                            visibility: 'hidden',
+                        });
+                        document.body.appendChild(iframe);
+                    }
+
+                    const doc = iframe.contentWindow?.document;
+                    if (!doc) return;
+
+                    const printContent = this.$refs.printArea.innerHTML;
+
+                    doc.open();
+                    doc.write(`
+                        <html>
+                          <head>
+                            <title>Print Receipt</title>
+                            <style>
+                              * { box-sizing: border-box; margin: 0; padding: 0; }
+                              @page { size: auto; margin: 0; }
+                              body {
+                                font-family: 'Courier New', Courier, monospace;
+                                width: 80mm;
+                                padding: 10mm;
+                                font-size: 12px;
+                                color: #000;
+                              }
+                              .text-center { text-align: center; }
+                              .flex { display: flex; justify-content: space-between; }
+                              .font-bold { font-weight: bold; }
+                              .uppercase { text-transform: uppercase; }
+                              .dashed { border-top: 1px dashed #000; margin: 10px 0; }
+                              .w-full { width: 100%; }
+                              .absolute, .opacity-10, .bg-\\[url\\(.*?\\)\\] { display: none; }
+                            </style>
+                          </head>
+                          <body>${printContent}</body>
+                        </html>
+                    `);
+                    doc.close();
+
+                    setTimeout(() => {
+                        iframe.contentWindow?.focus();
+                        iframe.contentWindow?.print();
+                    }, 500);
+                },
+
+                closeModal() {
+                    this.isOpen = false;
+                    // Memicu event custom jika ada element luar yang mendengarkan close modal ini
+                    this.$dispatch('close-qr-modal');
+                }
+            }));
+
             Alpine.store('notifs', {
                 items: [],
                 _counter: 0,

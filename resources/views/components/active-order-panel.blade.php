@@ -12,14 +12,14 @@
 }">
 
     {{-- MAIN CONTENT: Grid Menu & Manajemen Item --}}
-    <main class="flex-1 overflow-hidden scrollbar-hide">
+    <main class="scrollbar-hide flex-1 overflow-hidden">
 
         {{-- Search Header --}}
         <div class="sticky top-0 z-10 p-4 pb-2 backdrop-blur-md" :class="isDark ? 'bg-slate-950/40' : 'bg-[#FDFBF7]/40'">
             <div class="flex w-full items-center gap-3">
 
                 {{-- Input Pencarian --}}
-                <div class="flex items-center gap-3 flex-1 p-3 px-5 border rounded-full transition-all shadow-sm"
+                <div class="flex flex-1 items-center gap-3 rounded-full border p-3 px-5 shadow-sm transition-all"
                     :class="isDark ? 'bg-slate-900 border-white/10 focus-within:border-amber-500/50' :
                         'bg-white border-gray-200 focus-within:border-orange-500'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -29,13 +29,12 @@
                         <path d="m21 21-4.3-4.3" />
                     </svg>
                     <input type="text" placeholder="Search menu items..."
-                        class="bg-transparent border-none outline-none w-full text-sm font-medium focus:ring-0"
+                        class="w-full border-none bg-transparent text-sm font-medium outline-none focus:ring-0"
                         x-model="search">
 
                     {{-- Tombol Toggle Tema --}}
-                    <button
-                        @click="isDark = !isDark; window.dispatchEvent(new CustomEvent('toggle-theme', { detail: isDark }))"
-                        type="button" class="hover:scale-110 transition-transform active:rotate-90">
+                    <button @click="$dispatch('toggle-theme')" type="button"
+                        class="transition-transform hover:scale-110 active:rotate-90">
                         <template x-if="isDark">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -57,7 +56,7 @@
 
                 {{-- Aksi Utama Kontrol Sesi --}}
                 <button @click="newOrder()" type="button"
-                    class="flex items-center p-3 gap-2 rounded-full text-[11px] font-black uppercase bg-orange-600 text-white transition-transform active:scale-95 shadow-md">
+                    class="flex items-center gap-2 rounded-full bg-orange-600 p-3 text-[11px] font-black uppercase text-white shadow-md transition-transform active:scale-95">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -68,7 +67,7 @@
                 </button>
 
                 <button @click="openCloseModal = true" type="button"
-                    class="flex items-center p-3 gap-2 rounded-full text-[11px] font-black uppercase bg-amber-500 text-slate-900 transition-transform active:scale-95 shadow-md">
+                    class="flex items-center gap-2 rounded-full bg-amber-500 p-3 text-[11px] font-black uppercase text-slate-900 shadow-md transition-transform active:scale-95">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -82,10 +81,10 @@
         </div>
 
         {{-- Navigasi Filter Kategori --}}
-        <div class="sticky top-[72px] z-10 px-4 py-2 overflow-x-auto scrollbar-hide">
-            <div class="flex gap-2 w-max">
+        <div class="scrollbar-hide sticky top-[72px] z-10 overflow-x-auto px-4 py-2">
+            <div class="flex w-max gap-2">
                 <button @click="categorySelect = -1" type="button"
-                    class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
+                    class="rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all"
                     :class="categorySelect === -1 ?
                         (isDark ? 'bg-amber-500 text-slate-900' : 'bg-orange-600 text-white') :
                         (isDark ? 'bg-slate-800 text-gray-400 hover:bg-slate-700' :
@@ -96,7 +95,7 @@
                 {{-- Loop Kategori dari Injection Props Blade --}}
                 @foreach ($categories as $cat)
                     <button @click="categorySelect = {{ $cat['id'] }}" type="button"
-                        class="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
+                        class="rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all"
                         :class="categorySelect === {{ $cat['id'] }} ?
                             (isDark ? 'bg-amber-500 text-slate-900' : 'bg-orange-600 text-white') :
                             (isDark ? 'bg-slate-800 text-gray-400 hover:bg-slate-700' :
@@ -108,41 +107,43 @@
         </div>
 
         {{-- Grid Menu Utama --}}
-        <div class="flex-1 h-full overflow-y-auto px-4 pb-36 scrollbar-hide">
+        <div class="scrollbar-hide h-full flex-1 overflow-y-auto px-4 pb-36">
             <template x-for="cat in filteredMenu" :key="cat.id">
                 <div class="mb-8">
-                    <h2 class="text-sm uppercase font-black mb-4 flex items-center gap-2"
+                    <h2 class="mb-4 flex items-center gap-2 text-sm font-black uppercase"
                         :class="isDark ? 'text-amber-500' : 'text-orange-600'">
                         <span class="h-1 w-4 rounded-full" :class="isDark ? 'bg-amber-500' : 'bg-orange-600'"></span>
                         <span x-text="cat.name"></span>
                     </h2>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         <template x-for="item in cat.items" :key="item.id">
                             <div @click="!((!selectedOrderId || selectedOrder?.payment)) && handleAddOrUpdate(item)"
-                                class="group relative rounded-3xl p-4 border transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                                class="group relative flex cursor-pointer flex-col justify-between rounded-3xl border p-4 transition-all duration-300"
                                 :class="isDark ? 'bg-slate-900 border-white/5 hover:border-amber-500/30' :
                                     'bg-white border-gray-100 hover:border-orange-200'">
 
                                 <div class="flex gap-4">
                                     <template x-if="atLeastPro">
-                                        <div class="relative w-24 h-24 shrink-0">
-                                            <img loading="lazy" :src="item.image_url ?? '/images/placeholder-food.jpg'"
-                                                class="w-full h-full object-cover rounded-2xl-custom"
+                                        <div class="relative h-24 w-24 shrink-0">
+                                            <img loading="lazy"
+                                                :src="item.imageUrl ??
+                                                    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=400&h=300&auto=format&fit=crop'"
+                                                class="rounded-2xl-custom h-full w-full object-cover"
                                                 style="border-radius: 1rem;" :alt="item.name">
                                             <template x-if="(cartInfoMap[item.id]?.totalQty ?? 0) > 0">
-                                                <div class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold h-6 w-6 rounded-full flex items-center justify-center border-2 border-white animate-bounce"
+                                                <div class="absolute -right-2 -top-2 flex h-6 w-6 animate-bounce items-center justify-center rounded-full border-2 border-white bg-red-500 text-[10px] font-bold text-white"
                                                     x-text="cartInfoMap[item.id]?.totalQty ?? 0">
                                                 </div>
                                             </template>
                                         </div>
                                     </template>
-                                    <div class="flex flex-col justify-between py-1 flex-1">
+                                    <div class="flex flex-1 flex-col justify-between py-1">
                                         <div>
-                                            <h3 class="text-sm font-bold line-clamp-1"
+                                            <h3 class="line-clamp-1 text-sm font-bold"
                                                 :class="isDark ? 'text-white' : 'text-slate-800'" x-text="item.name">
                                             </h3>
-                                            <p class="text-[10px] text-gray-500 line-clamp-2"
+                                            <p class="line-clamp-2 text-[10px] text-gray-500"
                                                 x-text="item.description"></p>
                                         </div>
                                         <p class="text-sm font-black"
@@ -151,15 +152,15 @@
                                 </div>
 
                                 {{-- Manajemen Kuantitas Item --}}
-                                <div class="mt-4 pt-4 border-t flex items-center justify-between"
+                                <div class="mt-4 flex items-center justify-between border-t pt-4"
                                     :class="isDark ? 'border-white/5' : 'border-gray-100'">
                                     <span class="text-[10px] font-bold uppercase opacity-40">Qty</span>
-                                    <div class="flex items-center gap-1 p-1 rounded-full bg-black/10">
+                                    <div class="flex items-center gap-1 rounded-full bg-black/10 p-1">
                                         <button type="button"
                                             :disabled="!selectedOrderId || !!selectedOrder?.payment || !(cartInfoMap[item.id]
                                                 ?.cartItem)"
                                             @click.stop="cartInfoMap[item.id]?.cartItem && updateItemQty(cartInfoMap[item.id].cartItem.id, cartInfoMap[item.id].cartItem.quantity - 1)"
-                                            class="p-1.5 rounded-full hover:bg-red-500 hover:text-white transition-colors disabled:opacity-20">
+                                            class="rounded-full p-1.5 transition-colors hover:bg-red-500 hover:text-white disabled:opacity-20">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -171,7 +172,7 @@
                                         <button type="button"
                                             :disabled="!selectedOrderId || !!selectedOrder?.payment"
                                             @click.stop="handleAddOrUpdate(item)"
-                                            class="p-1.5 rounded-full bg-orange-600 text-white disabled:bg-gray-500">
+                                            class="rounded-full bg-orange-600 p-1.5 text-white disabled:bg-gray-500">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -194,11 +195,11 @@
     </template>
 
     <template x-if="!(selectedOrderId && selectedOrder)">
-        <aside class="w-60 border-l transition-all duration-500 flex flex-col shrink-0"
+        <aside class="flex w-60 shrink-0 flex-col border-l transition-all duration-500"
             :class="isDark ? 'bg-slate-900/50 border-white/10 backdrop-blur-xl' : 'bg-white border-gray-200 shadow-xl'">
 
-            <div class="p-6 border-b" :class="isDark ? 'border-white/5' : 'border-gray-100'">
-                <div class="flex items-center gap-2 mb-1">
+            <div class="border-b p-6" :class="isDark ? 'border-white/5' : 'border-gray-100'">
+                <div class="mb-1 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round" :class="isDark ? 'text-amber-500' : 'text-orange-600'">
@@ -207,27 +208,27 @@
                         <rect width="7" height="7" x="14" y="14" rx="1" />
                         <rect width="7" height="7" x="3" y="14" rx="1" />
                     </svg>
-                    <h2 class="font-black text-sm uppercase tracking-wider"
+                    <h2 class="text-sm font-black uppercase tracking-wider"
                         :class="isDark ? 'text-gray-100' : 'text-gray-800'">Active Orders</h2>
                 </div>
-                <p class="text-[10px] text-gray-500 font-medium">Monitoring meja yang sedang aktif</p>
+                <p class="text-[10px] font-medium text-gray-500">Monitoring meja yang sedang aktif</p>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+            <div class="scrollbar-hide flex-1 space-y-4 overflow-y-auto p-4">
                 <template x-if="orders.length === 0">
-                    <div class="flex flex-col items-center justify-center h-40 opacity-40">
+                    <div class="flex h-40 flex-col items-center justify-center opacity-40">
                         <p class="text-xs font-bold italic">No active orders</p>
                     </div>
                 </template>
 
                 <template x-for="order in [...orders].reverse()" :key="order.id">
                     <div @click="selectOrder(order.id)"
-                        class="group relative p-4 rounded-3xl border transition-all duration-300 cursor-pointer"
+                        class="group relative cursor-pointer rounded-3xl border p-4 transition-all duration-300"
                         :class="isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800 hover:border-amber-500/50' :
                             'bg-gray-50 border-gray-100 hover:bg-white hover:shadow-lg hover:border-orange-200'">
 
                         <template x-if="atLeastPro">
-                            <div class="flex justify-between items-start mb-3">
+                            <div class="mb-3 flex items-start justify-between">
                                 <div class="flex flex-col">
                                     <span class="text-[10px] font-black uppercase tracking-widest"
                                         :class="isDark ? 'text-amber-500' : 'text-orange-600'">Table</span>
@@ -237,29 +238,29 @@
                                 <div class="space-y-1">
                                     <div class="flex flex-col items-end">
                                         <span
-                                            class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter"
+                                            class="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-tighter"
                                             :class="isDark ? 'bg-slate-950 text-amber-400 border border-white/10' :
                                                 'bg-orange-100 text-orange-700'">
                                             <span class="relative flex h-2 w-2">
                                                 <span
-                                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                                    class="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
                                                 <span
-                                                    class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                                                    class="relative inline-flex h-2 w-2 rounded-full bg-orange-500"></span>
                                             </span>
                                             <span x-text="order.status"></span>
                                         </span>
                                     </div>
                                     <div class="flex flex-col items-end">
                                         <span
-                                            class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter"
+                                            class="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-tighter"
                                             :class="[order.payment ? 'text-green-400' : 'text-red-400', isDark ?
                                                 'bg-slate-950 border border-white/10' : 'bg-orange-100'
                                             ]">
                                             <span class="relative flex h-2 w-2">
                                                 <span
-                                                    class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                                                    class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
                                                     :class="order.payment ? 'bg-green-400' : 'bg-red-400'"></span>
-                                                <span class="relative inline-flex rounded-full h-2 w-2"
+                                                <span class="relative inline-flex h-2 w-2 rounded-full"
                                                     :class="order.payment ? 'bg-green-500' : 'bg-red-500'"></span>
                                             </span>
                                             <span x-text="order.payment ? 'Bill Paid' : 'Not Paid'"></span>
@@ -269,7 +270,7 @@
                             </div>
                         </template>
 
-                        <div class="pt-3 border-t mt-1 flex flex-col gap-1.5"
+                        <div class="mt-1 flex flex-col gap-1.5 border-t pt-3"
                             :class="isDark ? 'border-white/5' : 'border-gray-200/60'">
                             <div class="flex items-center gap-2 opacity-60">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
@@ -290,12 +291,12 @@
                                     <line x1="10" x2="8" y1="3" y2="21" />
                                     <line x1="16" x2="14" y1="3" y2="21" />
                                 </svg>
-                                <span class="text-[10px] font-mono tracking-tight uppercase"
+                                <span class="font-mono text-[10px] uppercase tracking-tight"
                                     x-text="order.order_code"></span>
                             </div>
                         </div>
 
-                        <div class="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                        <div class="absolute bottom-4 right-4 opacity-0 transition-opacity group-hover:opacity-100"
                             :class="isDark ? 'text-amber-500' : 'text-orange-600'">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -310,7 +311,7 @@
                 </template>
             </div>
 
-            <div class="p-4 text-center text-[9px] font-bold tracking-widest uppercase opacity-30"
+            <div class="p-4 text-center text-[9px] font-bold uppercase tracking-widest opacity-30"
                 :class="isDark ? 'text-white' : 'text-black'">
                 AnoPos v0.5.alpha
             </div>

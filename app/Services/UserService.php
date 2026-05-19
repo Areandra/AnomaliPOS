@@ -10,10 +10,11 @@ class UserService
     /**
      * Ambil semua user selain diri sendiri
      */
-    public static function allUser(int $meId): Collection
+    public static function allUser(int $meId, int $rId): Collection
     {
         return User::query()
             ->where('id', '!=', $meId)
+            ->where('restaurant_id', '==', $rId)
             ->orderByDesc('id')
             ->get();
     }

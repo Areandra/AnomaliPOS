@@ -45,6 +45,7 @@ class OrderController extends Controller
             'session'    => $order->tableSession ? [
                 'session_token'      => $order->tableSession->token,
                 'created_by_user'    => $order->tableSession->createdBy,
+                'started_at'         => $order->tableSession->started_at
             ] : null,
             'items' => $order->items->map(fn($item) => [
                 'id'        => $item->id,
@@ -62,14 +63,14 @@ class OrderController extends Controller
         ];
     }
 
-    // GET /api/order/{id}
+    // GET /order/{id}
     public function show(int $id): JsonResponse
     {
         $order = $this->orderWithRelations($id);
         return response()->json($this->serializeOrder($order));
     }
 
-    // POST /api/order
+    // POST /order
     public function store(Request $request)
     {
         $plan         = session('restaurant_plan', 'starter');
@@ -145,7 +146,7 @@ class OrderController extends Controller
         return response()->redirectToRoute('cashier.index');
     }
 
-    // POST /api/order/add-item
+    // POST /order/add-item
     public function addItem(Request $request): JsonResponse
     {
         $orderId    = $request->input('orderId');
@@ -172,7 +173,7 @@ class OrderController extends Controller
         return response()->json($this->serializeOrder($this->orderWithRelations($orderId)));
     }
 
-    // POST /api/order/update-qty
+    // POST /order/update-qty
     public function updateQty(Request $request): JsonResponse
     {
         $itemId = $request->input('itemId');
@@ -187,7 +188,7 @@ class OrderController extends Controller
         return response()->json($this->serializeOrder($this->orderWithRelations($item->order_id)));
     }
 
-    // POST /api/order/delete-item
+    // POST /order/delete-item
     public function deleteItem(Request $request): JsonResponse
     {
         $itemId  = $request->input('itemId');
@@ -198,7 +199,7 @@ class OrderController extends Controller
         return response()->json($this->serializeOrder($this->orderWithRelations($orderId)));
     }
 
-    // POST /api/order/place-order/{id}
+    // POST /order/place-order/{id}
     public function placeOrder(int $id): JsonResponse
     {
         $plan      = session('restaurant_plan', 'starter');
@@ -233,7 +234,7 @@ class OrderController extends Controller
         return response()->json($this->serializeOrder($this->orderWithRelations($id)));
     }
 
-    // POST /api/order/{id}/notes
+    // POST /order/{id}/notes
     public function makeNotes(Request $request, int $id): JsonResponse
     {
         $notes = $request->input('notes');
@@ -250,7 +251,7 @@ class OrderController extends Controller
         return response()->json($this->serializeOrder($this->orderWithRelations($item->order_id)));
     }
 
-    // POST /api/session/{token}/end
+    // POST /session/{token}/end
     public function endSession(string $token): JsonResponse
     {
         $session = TableSession::query()->where('token', $token)->firstOrFail();

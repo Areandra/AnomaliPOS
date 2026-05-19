@@ -5,11 +5,11 @@
 
             {{-- ICON STATUS --}}
             <div class="flex justify-center mb-8">
-                <div :class="$store.theme.isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
+                <div :class="isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
                     'bg-blue-50 border-blue-100 text-blue-600'"
                     class="relative h-24 w-24 rounded-[2.5rem] flex items-center justify-center shadow-2xl border">
                     <i data-lucide="key-round" class="w-12 h-12 animate-bounce"></i>
-                    <div :class="$store.theme.isDark ? 'bg-slate-800 text-blue-500' : 'bg-white text-blue-600'"
+                    <div :class="isDark ? 'bg-slate-800 text-blue-500' : 'bg-white text-blue-600'"
                         class="absolute -bottom-2 -right-2 h-10 w-10 rounded-2xl flex items-center justify-center shadow-lg rotate-12">
                         <i data-lucide="shield-check" class="w-5 h-5"></i>
                     </div>
@@ -19,7 +19,7 @@
             {{-- HEADER --}}
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-black uppercase tracking-tighter italic leading-none mb-4">
-                    Reset <span :class="$store.theme.isDark ? 'text-blue-500' : 'text-blue-600'">PIN</span>
+                    Reset <span :class="isDark ? 'text-blue-500' : 'text-blue-600'">PIN</span>
                 </h1>
                 <div class="h-1 w-12 mx-auto rounded-full mb-6 bg-blue-500/20"></div>
                 <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-2 opacity-80">

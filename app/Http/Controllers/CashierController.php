@@ -7,14 +7,15 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Shift;
 use App\Models\Table;
+use Illuminate\Support\Facades\Auth;
 
 class CashierController extends Controller
 {
   public function index()
   {
     $plan        = session('restaurant_plan', 'starter');
-    $menuItems   = MenuItem::where('restaurant_id', session('restaurant_id'))->where('is_available', true)->get();
-    $categories  = MenuCategory::where('restaurant_id', session('restaurant_id'))->get();
+    $menuItems   = MenuItem::query()->where('restaurant_id', session('restaurant_id'))->where('is_available', true)->get();
+    $categories  = MenuCategory::query()->where('restaurant_id', session('restaurant_id'))->get();
 
     $orders = $plan !== 'starter'
       ? Order::with(['payment', 'table'])
@@ -22,12 +23,12 @@ class CashierController extends Controller
       ->with('tableSession')
       ->where('restaurant_id', session('restaurant_id'))
       ->get()
-      : Order::whereDoesntHave('payment')
+      : Order::query()->whereDoesntHave('payment')
       ->where('restaurant_id', session('restaurant_id'))
       ->get();
 
     $currentShift = Shift::with('user')
-      ->where('user_id', auth()->id())
+      ->where('user_id', Auth::guard('web')->user()->id)
       ->where('status', 'open')
       ->first();
 
@@ -46,7 +47,7 @@ class CashierController extends Controller
       'orders.payment',
     ])->where('restaurant_id', session('restaurant_id'))->get();
 
-    $currentShift = Shift::where('user_id', auth()->id())->where('status', 'open')->first();
+    $currentShift = Shift::query()->where('user_id', Auth::guard('web')->user()->id)->where('status', 'open')->first();
 
     return view('cashier.start', ['data' => $tables->map(fn($t) => [
       'id'             => $t->id,

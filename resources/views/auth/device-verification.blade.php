@@ -7,9 +7,9 @@
             <div class="flex justify-center mb-8">
                 <div :class="isSuccess
                     ?
-                    ($store.theme.isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                    (isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
                         'bg-emerald-50 border-emerald-100 text-emerald-600') :
-                    ($store.theme.isDark ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                    (isDark ? 'bg-red-500/10 border-red-500/20 text-red-500' :
                         'bg-red-50 border-red-100 text-red-600')"
                     class="relative h-24 w-24 rounded-[2.5rem] flex items-center justify-center shadow-2xl border">
                     <template x-if="isSuccess">
@@ -18,7 +18,7 @@
                     <template x-if="!isSuccess">
                         <i data-lucide="shield-alert" class="w-12 h-12 animate-pulse"></i>
                     </template>
-                    <div :class="[$store.theme.isDark ? 'bg-slate-800' : 'bg-white', isSuccess ? 'text-emerald-500' : 'text-red-500']"
+                    <div :class="[isDark ? 'bg-slate-800' : 'bg-white', isSuccess ? 'text-emerald-500' : 'text-red-500']"
                         class="absolute -bottom-2 -right-2 h-10 w-10 rounded-2xl flex items-center justify-center shadow-lg rotate-12">
                         <i :data-lucide="isSuccess ? 'check-circle-2' : 'x-circle'" class="w-5 h-5"></i>
                     </div>
@@ -29,11 +29,11 @@
             <h1 class="text-4xl font-black uppercase tracking-tighter italic leading-none mb-4">
                 <template x-if="isSuccess">
                     <span>Device <span
-                            :class="$store.theme.isDark ? 'text-emerald-500' : 'text-emerald-600'">Trusted</span></span>
+                            :class="isDark ? 'text-emerald-500' : 'text-emerald-600'">Trusted</span></span>
                 </template>
                 <template x-if="!isSuccess">
                     <span>Access <span
-                            :class="$store.theme.isDark ? 'text-red-500' : 'text-red-600'">Denied</span></span>
+                            :class="isDark ? 'text-red-500' : 'text-red-600'">Denied</span></span>
                 </template>
             </h1>
             <div :class="isSuccess ? 'bg-emerald-500/20' : 'bg-red-500/20'" class="h-1 w-12 mx-auto rounded-full mb-6">

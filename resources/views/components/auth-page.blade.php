@@ -19,12 +19,12 @@
 ])
 
 <div
-    :class="$store.theme.isDark ? 'bg-slate-950 text-white' : 'bg-[#FDFBF7] text-slate-900'"
+    :class="isDark ? 'bg-slate-950 text-white' : 'bg-[#FDFBF7] text-slate-900'"
     class="min-h-screen flex items-center justify-center p-6 transition-colors duration-500"
 >
 
     {{-- Glow background — hanya muncul di dark mode --}}
-    <template x-if="$store.theme.isDark">
+    <template x-if="isDark">
         <div class="fixed inset-0 pointer-events-none opacity-20">
             <div class="absolute top-0 left-0 w-[500px] h-[500px] rounded-full blur-[120px] mix-blend-screen {{ $glowFrom }}"></div>
             <div class="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] mix-blend-screen {{ $glowTo }}"></div>

@@ -5,13 +5,13 @@
 
             {{-- ICON STATUS --}}
             <div class="flex justify-center mb-8">
-                <div :class="$store.theme.isDark ?
+                <div :class="isDark ?
                     'bg-indigo-500/10 border-indigo-500/20 text-indigo-500' :
                     'bg-indigo-50 border-indigo-100 text-indigo-600'"
                     class="relative h-24 w-24 rounded-[2.5rem] flex items-center justify-center shadow-2xl border">
                     <i data-lucide="lock-keyhole" class="w-12 h-12 animate-pulse"></i>
 
-                    <div :class="$store.theme.isDark ? 'bg-slate-800 text-indigo-500' : 'bg-white text-indigo-600'"
+                    <div :class="isDark ? 'bg-slate-800 text-indigo-500' : 'bg-white text-indigo-600'"
                         class="absolute -bottom-2 -right-2 h-10 w-10 rounded-2xl flex items-center justify-center shadow-lg rotate-12">
                         <i data-lucide="shield-alert" class="w-5 h-5"></i>
                     </div>
@@ -22,7 +22,7 @@
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-black uppercase tracking-tighter italic leading-none mb-4">
                     Reset
-                    <span :class="$store.theme.isDark ? 'text-indigo-500' : 'text-indigo-600'">Pass</span>
+                    <span :class="isDark ? 'text-indigo-500' : 'text-indigo-600'">Pass</span>
                 </h1>
 
                 <div class="h-1 w-12 mx-auto rounded-full mb-6 bg-indigo-500/20"></div>

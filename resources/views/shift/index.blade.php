@@ -21,10 +21,10 @@
         {{-- Background Ambient --}}
         <template x-if="isDark">
             <div class="pointer-events-none fixed inset-0 opacity-20">
-                <div class="w-125 h-125 absolute left-0 top-0 rounded-full bg-indigo-900 mix-blend-screen blur-[120px]">
+                <div class="w-125 h-125 absolute left-0 top-0 rounded-full bg-purple-900 mix-blend-screen blur-[120px]">
                 </div>
                 <div
-                    class="w-125 h-125 absolute bottom-0 right-0 rounded-full bg-amber-900 mix-blend-screen blur-[120px]">
+                    class="w-125 h-125 absolute bottom-0 right-0 rounded-full bg-blue-900 mix-blend-screen blur-[120px]">
                 </div>
             </div>
         </template>
@@ -96,8 +96,7 @@
                         <div class="mb-6 flex items-center gap-3">
                             <img :src="s.user.avatarUrl ??
                                 `https://ui-avatars.com/api/?name=${encodeURIComponent(s.user.name)}&background=${isDark ? '1e293b' : 'f1f5f9'}&color=${isDark ? 'f59e0b' : 'ea580c'}&bold=true`"
-                                :alt="s.user.name"
-                                :class="isDark ? 'border-white/5' : 'border-gray-100'"
+                                :alt="s.user.name" :class="isDark ? 'border-white/5' : 'border-gray-100'"
                                 class="h-12 w-12 rounded-2xl border object-cover shadow-sm" />
                             <div>
                                 <h3 :class="isDark ? 'text-white' : 'text-slate-800'"

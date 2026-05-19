@@ -47,7 +47,7 @@
 
     $links = [];
     if ($atLeastPro) {
-        $links[] = ['label' => 'Kitchen', 'href' => '/kitchen/kot', 'icon' => 'utensils'];
+        $links[] = ['label' => 'Kitchen', 'href' => '/kitchen', 'icon' => 'utensils'];
     }
     $links[] = ['label' => 'Cashier', 'href' => '/cashier', 'icon' => 'calculator'];
 

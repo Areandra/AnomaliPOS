@@ -1,6 +1,9 @@
 import ReactDOM from "react-dom/client";
 import React from "react";
 import DragLayout from "./components/DragLayout";
+import QRCode from "qrcode";
+
+window.QRCode = QRCode;
 
 if (window.location.href.includes("tables")) {
     window.DragLayout = DragLayout;

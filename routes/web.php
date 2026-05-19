@@ -4,10 +4,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CashierController;
+use App\Http\Controllers\CostumerController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\MenuCategoryController;
 use App\Http\Controllers\MenuItemController;
@@ -34,9 +36,6 @@ Route::get('/account-activation', [
 ])
     ->name('account-activation')
     ->middleware('signed');
-
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/dashboard', [DashboardController::class, 'index']);
 
 // Redirect legacy URLs
 Route::redirect('/menu', '/menu/items');
@@ -154,6 +153,8 @@ Route::get('/change-password', [AuthController::class, 'showChangePassword'])->n
 
 Route::middleware(['auth', 'auth.restaurant', 'tenant.context'])->group(function () {
 
+
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     // ========================================================================
     // USER MANAGEMENT
     // ========================================================================
@@ -257,10 +258,10 @@ Route::middleware(['auth', 'auth.restaurant', 'tenant.context'])->group(function
         Route::get('/attendance/me', [ShiftController::class, 'attendenceMe'])->name('attendance.me');
     });
 
+    // ========================================================================
+    // CASHIER ROUTES
+    // ========================================================================
     Route::middleware(['plan.acsess'])->group(function () {
-        // ========================================================================
-        // CASHIER ROUTES
-        // ========================================================================
 
         Route::get('/cashier', [CashierController::class, 'index'])
             ->name('cashier.index');
@@ -294,4 +295,45 @@ Route::middleware(['auth', 'auth.restaurant', 'tenant.context'])->group(function
 
         Route::post('/payments', [PaymentController::class, 'store']);
     });
+
+    // ========================================================================
+    // KITCHEN ROUTES
+    // ========================================================================
+
+    Route::middleware(['plan.acsess'])->group(function () {
+
+        Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen.index');
+        Route::get('/kitchen/category/{id}', [KitchenController::class, 'show'])->name('kitchen.show');
+
+        // Route POST yang dipanggil oleh fungsi fetch() milik Alpine.js di blade Anda
+        Route::post('/kitchen/order-item/{id}/status', [KitchenController::class, 'updateStatus']);
+    });
 });
+
+Route::prefix('order')
+    ->middleware('costumer') // Asumsi nama alias middleware Anda adalah 'costumer'
+    ->group(function () {
+
+        // Group Kedua: Middleware Auth khusus guard 'restaurant'
+        Route::middleware(['auth.restaurant'])->group(function () {
+
+            // Group Ketiga: Middleware plan access dengan parameter, dan middleware restaurant
+            // Di Laravel, parameter middleware dipisah dengan koma setelah tanda titik dua (:)
+            Route::middleware(['plan.acsess:pro,enterprise', 'tenant.context'])->group(function () {
+
+                // ----------------------- Frontend ------------------------------
+                Route::get('/session/{sessionToken}', [CostumerController::class, 'index']);
+                Route::get('/session/{sessionToken}/cart', [CostumerController::class, 'cart']);
+                Route::get('/session/{sessionToken}/order', [CostumerController::class, 'order']);
+
+                // Route::get('/session/{sessionToken}/categories/{id}', [CostumerController::class, 'showByCategories']);
+
+                // ------------------------- API ---------------------------------
+                Route::post('/session/{sessionToken}/add-item', [CostumerController::class, 'addItem']);
+                Route::post('/session/{sessionToken}/update-qty', [CostumerController::class, 'updateQty']);
+                Route::post('/session/{sessionToken}/delete-item', [CostumerController::class, 'deleteItem']);
+                Route::post('/session/{sessionToken}/place-order', [CostumerController::class, 'placeOrder']);
+
+            });
+        });
+    });

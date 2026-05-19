@@ -1,41 +1,40 @@
-<div
-    x-data
-    x-show="$store.receipt.visible"
-    x-cloak
-    class="fixed h-[100dvh] inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center z-50 py-8"
->
-    <div
-        :class="isDark ? 'bg-slate-900 border-white/10' : 'bg-white border-gray-100'"
-        class="relative w-full h-full pb-64 max-w-sm rounded-[2.5rem] shadow-2xl overflow-hidden border"
-    >
+<div x-data x-show="$store.receipt.visible" x-cloak
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+
+    <!-- 1. CONTAINER UTAMA: Set maksimal tinggi 85% dari layar (max-h-[85vh]) dan overflow-hidden -->
+    <div :class="isDark ? 'bg-slate-900 border-white/10' : 'bg-white border-gray-100'"
+        class="relative flex max-h-[85vh] w-full max-w-sm flex-col overflow-hidden rounded-[2.5rem] border shadow-2xl">
+
         {{-- Header --}}
-        <div class="p-4 pb-4 text-center">
-            <div class="inline-flex mb-4">
-                <div class="w-32 h-32 flex items-center justify-center">
-                    <i data-lucide="check-circle-2" class="w-20 h-20 text-emerald-500"></i>
+        <!-- Diperkecil sedikit padding & marginnya agar hemat ruang saat item banyak -->
+        <div class="flex-shrink-0 p-4 pb-2 text-center">
+            <div class="mb-2 inline-flex">
+                <div class="flex h-20 w-20 items-center justify-center">
+                    <i data-lucide="check-circle-2" class="h-14 w-14 text-emerald-500"></i>
                 </div>
             </div>
-            <h2 :class="isDark ? 'text-white' : 'text-slate-900'"
-                class="text-xl font-black uppercase tracking-tight"
+            <h2 :class="isDark ? 'text-white' : 'text-slate-900'" class="text-xl font-black uppercase tracking-tight"
                 x-text="$store.receipt.title || 'Payment Success'"></h2>
-            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Transaction has been finalized</p>
+            <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">Transaction has been finalized
+            </p>
         </div>
 
         {{-- Receipt --}}
-        <div class="h-[85%] px-8 overflow-y-auto">
-            <div id="receipt-print-area"
-                 class="bg-white text-slate-950 p-6 rounded-sm shadow-inner relative"
-                 style="font-family: 'Courier New', Courier, monospace">
+        <!-- 2. WRAPPER STRUK: Menggunakan flex-1 dan overflow-y-auto -->
+        <!-- Jika item sedikit, dia akan pas menyesuaikan isi. Jika item sangat banyak hingga modal menyentuh tinggi 85vh, bagian ini akan otomatis bisa di-scroll -->
+        <div class="flex-1 overflow-y-auto px-8 py-2">
+            <div id="receipt-print-area" class="relative rounded-sm bg-white p-6 text-slate-950 shadow-inner"
+                style="font-family: 'Courier New', Courier, monospace">
 
-                <div class="text-center mb-4">
-                    <h3 class="font-bold text-lg leading-none mb-1"
+                <div class="mb-4 text-center">
+                    <h3 class="mb-1 text-lg font-bold leading-none"
                         x-text="($store.receipt.restaurant || '').toUpperCase()"></h3>
                     <p class="text-[10px] uppercase" x-text="$store.receipt.order?.order_code"></p>
                 </div>
 
-                <div class="border-t border-dashed border-slate-300 my-3"></div>
+                <div class="my-3 border-t border-dashed border-slate-300"></div>
 
-                <div class="text-[11px] space-y-1">
+                <div class="space-y-1 text-[11px]">
                     <div class="flex justify-between">
                         <span>TABLE</span>
                         <span class="font-bold" x-text="$store.receipt.order?.table?.tableNumber || 'TA'"></span>
@@ -46,11 +45,12 @@
                     </div>
                     <div class="flex justify-between">
                         <span>DATE</span>
-                        <span x-text="$store.receipt.payment ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date($store.receipt.payment.created_at)) : ''"></span>
+                        <span
+                            x-text="$store.receipt.payment ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date($store.receipt.payment.created_at)) : ''"></span>
                     </div>
                 </div>
 
-                <div class="border-t border-dashed border-slate-300 my-3"></div>
+                <div class="my-3 border-t border-dashed border-slate-300"></div>
 
                 <div class="space-y-2">
                     <template x-for="item in ($store.receipt.order?.items || [])" :key="item.id">
@@ -66,9 +66,9 @@
                     </template>
                 </div>
 
-                <div class="border-t border-dashed border-slate-300 my-3"></div>
+                <div class="my-3 border-t border-dashed border-slate-300"></div>
 
-                <div class="text-[11px] space-y-1">
+                <div class="space-y-1 text-[11px]">
                     <div class="flex justify-between">
                         <span>SUBTOTAL</span>
                         <span x-text="formatRp($store.receipt.order?.subtotal)"></span>
@@ -77,11 +77,11 @@
                         <span>TAX (10%)</span>
                         <span x-text="formatRp($store.receipt.order?.tax)"></span>
                     </div>
-                    <div class="flex justify-between font-bold text-sm pt-2">
+                    <div class="flex justify-between pt-2 text-sm font-bold">
                         <span>TOTAL</span>
                         <span x-text="formatRp($store.receipt.order?.total)"></span>
                     </div>
-                    <div class="border-t border-dashed border-slate-300 my-3"></div>
+                    <div class="my-3 border-t border-dashed border-slate-300"></div>
                     <div class="flex justify-between pt-2">
                         <span>CASH</span>
                         <span x-text="formatRp($store.receipt.payment?.amount)"></span>
@@ -92,23 +92,25 @@
                     </div>
                 </div>
 
-                <div class="border-t border-dashed border-slate-300 my-3"></div>
-                <p class="text-center text-[10px] font-bold uppercase tracking-tighter">Thank you for dining with us!</p>
+                <div class="my-3 border-t border-dashed border-slate-300"></div>
+                <p class="text-center text-[10px] font-bold uppercase tracking-tighter">Thank you for dining with us!
+                </p>
                 <p class="text-center text-[10px] uppercase">Powered by AnoPos</p>
             </div>
         </div>
 
         {{-- Actions --}}
-        <div :class="isDark ? 'bg-slate-900' : 'bg-white'" class="p-8 pt-4 flex gap-4">
+        <!-- 3. Ditambahkan flex-shrink-0 agar tombol aksi tidak ikut mengecil atau terpotong saat scroll terjadi -->
+        <div :class="isDark ? 'bg-slate-900' : 'bg-white'" class="flex flex-shrink-0 gap-4 p-8 pt-4">
             <button @click="printReceipt()"
                 :class="isDark ? 'bg-amber-500 text-slate-950 hover:bg-amber-400' : 'bg-slate-900 text-white hover:bg-slate-800'"
-                class="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95">
-                <i data-lucide="printer" class="w-4 h-4"></i>
+                class="flex flex-1 items-center justify-center gap-2 rounded-2xl py-4 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95">
+                <i data-lucide="printer" class="h-4 w-4"></i>
                 Print Struk
             </button>
             <button @click="$store.receipt.close()"
                 :class="isDark ? 'bg-white/5 text-gray-400 hover:bg-white/10' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
-                class="px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
+                class="rounded-2xl px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all">
                 Close
             </button>
         </div>
@@ -116,64 +118,101 @@
 </div>
 
 <script>
-document.addEventListener('alpine:init', () => {
-    Alpine.store('receipt', {
-        visible: false,
-        title: '',
-        payment: null,
-        restaurant: '',
-        order: null,
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('receipt', {
+            visible: false,
+            title: '',
+            payment: null,
+            restaurant: '',
+            order: null,
 
-        open(pay, restaurant, shift) {
-            this.payment    = pay
-            this.restaurant = restaurant?.name || restaurant || ''
-            this.order      = pay.order
-            this.title      = 'Receipt Information'
-            this.visible    = true
-        },
+            open(pay, restaurant, shift) {
+                this.payment = pay
+                this.restaurant = restaurant?.name || restaurant || ''
+                this.order = pay.order
+                this.title = 'Receipt Information'
+                this.visible = true
+            },
 
-        close() {
-            this.visible = false
-        }
+            close() {
+                this.visible = false
+            }
+        })
     })
-})
 
-function formatRp(v) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency', currency: 'IDR', minimumFractionDigits: 0
-    }).format(v || 0)
-}
-
-function printReceipt() {
-    let iframe = document.getElementById('print-iframe')
-    if (!iframe) {
-        iframe = document.createElement('iframe')
-        iframe.id = 'print-iframe'
-        Object.assign(iframe.style, { position: 'absolute', width: '0px', height: '0px', border: 'none', visibility: 'hidden' })
-        document.body.appendChild(iframe)
+    function formatRp(v) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(v || 0)
     }
-    const doc = iframe.contentWindow?.document
-    if (!doc) return
-    doc.open()
-    doc.write(`
+
+    function printReceipt() {
+        let iframe = document.getElementById('print-iframe')
+
+        if (!iframe) {
+            iframe = document.createElement('iframe')
+
+            Object.assign(iframe.style, {
+                position: 'fixed',
+                right: '0',
+                bottom: '0',
+                width: '0',
+                height: '0',
+                border: '0'
+            })
+
+            iframe.id = 'print-iframe'
+            document.body.appendChild(iframe)
+        }
+
+        const receipt = document.getElementById('receipt-print-area')
+
+        if (!receipt) return
+
+        const doc = iframe.contentWindow.document
+
+        doc.open()
+
+        doc.write(`
         <html>
         <head>
-            <title>Print Receipt</title>
+            <title>Receipt</title>
+
+            <script src="https://cdn.tailwindcss.com"><\/script>
+
             <style>
-                * { box-sizing: border-box; margin: 0; padding: 0; }
-                @page { size: auto; margin: 0; }
-                body { font-family: 'Courier New', Courier, monospace; width: 80mm; padding: 10mm; font-size: 12px; color: #000; }
-                .text-center { text-align: center; }
-                .flex { display: flex; justify-content: space-between; }
-                .bold { font-weight: bold; }
-                .dashed { border-top: 1px dashed #000; margin: 10px 0; }
-                .title { font-size: 16px; margin-bottom: 5px; }
+                @page {
+                    size: 80mm auto;
+                    margin: 0;
+                }
+
+                body {
+                    margin: 0;
+                    padding: 0;
+                    background: white;
+                }
+
+                #receipt-print-area {
+                    width: 80mm;
+                    padding: 12px;
+                    color: black;
+                }
             </style>
         </head>
-        <body>${document.getElementById('receipt-print-area')?.innerHTML || ''}</body>
+
+        <body>
+            ${receipt.outerHTML}
+        </body>
         </html>
     `)
-    doc.close()
-    setTimeout(() => { iframe.contentWindow?.focus(); iframe.contentWindow?.print() }, 500)
-}
+
+        doc.close()
+
+        iframe.onload = () => {
+            iframe.contentWindow.focus()
+            iframe.contentWindow.print()
+        }
+    }
 </script>

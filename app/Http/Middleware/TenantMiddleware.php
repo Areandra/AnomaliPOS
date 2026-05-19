@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Symfony\Component\HttpFoundation\Response;
 
-class Tenant
+class TenantMiddleware
 {
     /**
      * Handle an incoming request.

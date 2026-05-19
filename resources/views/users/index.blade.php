@@ -7,10 +7,10 @@
         <!-- Background Glow (Dark Mode) -->
         <template x-if="isDark">
             <div class="pointer-events-none fixed inset-0 opacity-20">
-                <div class="w-125 h-125 absolute left-0 top-0 rounded-full bg-indigo-900 mix-blend-screen blur-[120px]">
+                <div class="w-125 h-125 absolute left-0 top-0 rounded-full bg-purple-900 mix-blend-screen blur-[120px]">
                 </div>
                 <div
-                    class="w-125 h-125 absolute bottom-0 right-0 rounded-full bg-amber-900 mix-blend-screen blur-[120px]">
+                    class="w-125 h-125 absolute bottom-0 right-0 rounded-full bg-blue-900 mix-blend-screen blur-[120px]">
                 </div>
             </div>
         </template>

@@ -36,7 +36,7 @@
         <x-active-order-panel :categories="$categoriesData" />
 
         <x-receipt-modal />
-
+        <x-qr-modal />
     </div>
 
 </x-cashier-layout>
@@ -384,7 +384,6 @@
     function orderDetailPanel() {
         return {
             showPayment: false,
-            showQR: false,
             showNotesModal: false,
             orderNoteItemId: null,
             noteText: '',

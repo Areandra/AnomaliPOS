@@ -13,7 +13,7 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $users = UserService::allUser(Auth::guard('web')->user()->id);
+        $users = UserService::allUser(Auth::guard('web')->user()->id, Auth::guard('restaurant')->user()->id);
 
         return view('users.index', compact('users'));
     }

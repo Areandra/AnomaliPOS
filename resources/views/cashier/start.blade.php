@@ -354,6 +354,7 @@
 
     <script>
         function selectTableApp(tablesData, currentShift) {
+            console.log(tablesData)
             return {
                 tables: tablesData,
                 currentShift: currentShift,

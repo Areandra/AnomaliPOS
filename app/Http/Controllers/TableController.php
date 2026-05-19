@@ -107,7 +107,7 @@ class TableController extends Controller
 
         DB::transaction(function () use ($tables) {
             foreach ($tables as $item) {
-                Table::where('table_number', $item['tableNumber'])
+                Table::query()->where('table_number', $item['tableNumber'])
                     ->update([
                         'position_x' => $item['positionX'],
                         'position_y' => $item['positionY'],

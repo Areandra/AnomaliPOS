@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\Restaurant;
 use App\Models\User;
+use Auth;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -13,15 +15,15 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $restaurantId = session('restaurant_id');
+        $restaurantId = Auth::guard('restaurant')->user()->id;
         $plan         = session('restaurant_plan');
 
         // Fallback ke database kalau session belum di-set
         if (!$restaurantId || !$plan) {
-            $user = auth()->user();
+            $user = Auth::guard('web')->user();
             if ($user) {
-                $restaurant   = \App\Models\Restaurant::find($user->restaurant_id);
-                $restaurantId = $restaurantId ?? $user->restaurant_id;
+                $restaurant   = Restaurant::query()->find(Auth::guard('restaurant')->user()->id);
+                $restaurantId = $restaurantId ?? Auth::guard('restaurant')->user()->id;
                 $plan         = $plan ?? $restaurant?->plan ?? 'starter';
                 session(['restaurant_id' => $restaurantId, 'restaurant_plan' => $plan]);
             } else {
@@ -32,7 +34,7 @@ class DashboardController extends Controller
         $thirtyDaysAgo = $now->copy()->subDays(30);
 
         // --- Revenue per hari (30 hari) ---
-        $payments = Payment::where('restaurant_id', $restaurantId)
+        $payments = Payment::query()->where('restaurant_id', $restaurantId)
             ->where('status', 'paid')
             ->whereBetween('paid_at', [$thirtyDaysAgo, $now])
             ->with('order.items.menuItem')
@@ -66,12 +68,12 @@ class DashboardController extends Controller
         // --- Summary Cards (pro only) ---
         $summaryData = [];
         if ($plan !== 'starter') {
-            $todayPayments = Payment::where('restaurant_id', $restaurantId)
+            $todayPayments = Payment::query()->where('restaurant_id', $restaurantId)
                 ->where('status', 'paid')
                 ->whereDate('paid_at', $now->toDateString())
                 ->get();
 
-            $yesterdayPayments = Payment::where('restaurant_id', $restaurantId)
+            $yesterdayPayments = Payment::query()->where('restaurant_id', $restaurantId)
                 ->where('status', 'paid')
                 ->whereDate('paid_at', $now->copy()->subDay()->toDateString())
                 ->get();
@@ -82,13 +84,13 @@ class DashboardController extends Controller
                 ? round((($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100, 1) . '%'
                 : '+0%';
 
-            $todayOrders     = Order::where('restaurant_id', $restaurantId)->whereDate('created_at', $now)->count();
-            $yesterdayOrders = Order::where('restaurant_id', $restaurantId)->whereDate('created_at', $now->copy()->subDay())->count();
+            $todayOrders     = Order::query()->where('restaurant_id', $restaurantId)->whereDate('created_at', $now)->count();
+            $yesterdayOrders = Order::query()->where('restaurant_id', $restaurantId)->whereDate('created_at', $now->copy()->subDay())->count();
             $ordersChange    = $yesterdayOrders > 0
                 ? round((($todayOrders - $yesterdayOrders) / $yesterdayOrders) * 100, 1) . '%'
                 : '+0%';
 
-            $activeUsers = User::where('restaurant_id', $restaurantId)->where('status', 'active')->count();
+            $activeUsers = User::query()->where('restaurant_id', $restaurantId)->where('status', 'active')->count();
 
             $summaryData = [
                 ['title' => 'Active Staff',    'value' => $activeUsers,    'change' => '+0%',         'isPositive' => true],
@@ -100,7 +102,7 @@ class DashboardController extends Controller
         // --- Top 5 Menu (pro only) ---
         $top5Menu = [];
         if ($plan !== 'starter') {
-            $top5 = OrderItem::where('restaurant_id', $restaurantId)
+            $top5 = OrderItem::query()->where('restaurant_id', $restaurantId)
                 ->select('menu_item_id', DB::raw('SUM(quantity) as total_qty'))
                 ->groupBy('menu_item_id')
                 ->orderByDesc('total_qty')
@@ -122,7 +124,7 @@ class DashboardController extends Controller
         // --- Category Mix (pro only) ---
         $categoryData = ['labels' => [], 'values' => []];
         if ($plan !== 'starter') {
-            $catMix = OrderItem::where('order_items.restaurant_id', $restaurantId)
+            $catMix = OrderItem::query()->where('order_items.restaurant_id', $restaurantId)
                 ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
                 ->join('menu_categories', 'menu_items.category_id', '=', 'menu_categories.id')
                 ->select('menu_categories.name', DB::raw('SUM(order_items.quantity) as total'))
