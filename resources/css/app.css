@@ -22,3 +22,12 @@
     -ms-overflow-style: none; /* IE dan Edge */
     scrollbar-width: none; /* Firefox */
 }
+
+input:focus,
+textarea:focus,
+select:focus {
+    background: transparent !important;
+    color: white !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
