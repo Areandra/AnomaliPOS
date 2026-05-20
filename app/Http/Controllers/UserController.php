@@ -114,17 +114,17 @@ class UserController extends Controller
         }
     }
 
-    // public function me(): View
-    // {
-    //     $user = Auth:;
+    public function me(): View
+    {
+        $user = Auth::guard('web')->user();
 
-    //     $shifts = Shift::query()
-    //         ->where('user_id', $user->id)
-    //         ->get();
+        $shifts = Shift::query()
+            ->where('user_id', $user->id)
+            ->get();
 
-    //     return view('me', [
-    //         'user' => $user,
-    //         'shifts' => $shifts,
-    //     ]);
-    // }
+        return view('me', [
+            'user' => $user,
+            'shifts' => $shifts,
+        ]);
+    }
 }

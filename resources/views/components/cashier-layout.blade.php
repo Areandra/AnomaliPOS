@@ -1,4 +1,4 @@
-@props(['currentShift' => null, 'pageTitle' => null, 'title' => 'Cashier AnoPos'])
+@props(['currentShift' => null, 'pageTitle' => null, 'title' => 'Cashier AnomaliPOS'])
 
 <x-app-layout :title="$title">
     <div class="flex h-dvh flex-col overflow-hidden transition-colors duration-500">
@@ -31,7 +31,7 @@
                 <div class="flex flex-col">
                     <span class="text-xl font-black uppercase tracking-tighter"
                         :class="isDark ? 'text-white' : 'text-slate-800'">
-                        Ano<span :class="isDark ? 'text-amber-500' : 'text-orange-600'">Pos</span>
+                        ANOMALI<span :class="isDark ? 'text-amber-500' : 'text-orange-600'">POS</span>
                     </span>
                     @if ($pageTitle)
                         <span

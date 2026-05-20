@@ -1,5 +1,6 @@
 @props([
     'title' => null,
+    'not_admin' => false,
 ])
 
 @php
@@ -11,7 +12,7 @@
         [
             'name' => 'Dashboard',
             'icon' => 'layout-dashboard',
-            'href' => '/dashboard',
+            'href' => '/',
             'active' => $currentUrl === '/' || str_contains($currentUrl, 'dashboard'),
         ],
     ];
@@ -114,7 +115,7 @@
         </header>
 
         <div class="flex h-full pt-16">
-            <aside :class="hide ? 'w-20' : 'w-64'"
+            <aside :x-if={{ !$not_admin }} :class="hide ? 'w-20' : 'w-64'"
                 class="relative z-40 h-full shrink-0 border-r border-gray-200 bg-white duration-500 dark:border-white/5 dark:bg-slate-900">
                 <div class="flex h-14 w-full items-center justify-between border-b border-transparent p-4">
                     <span x-show="!hide"
@@ -142,15 +143,15 @@
                         class="{{ $isMeActive ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20 dark:bg-amber-500 dark:text-slate-950 dark:shadow-amber-500/20' : 'text-gray-500 hover:bg-gray-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white' }} flex w-full items-center rounded-full p-3 transition-all">
                         <x-lucide-user x-bind:class="hide ? 'mx-auto w-[22px] h-[22px]' : 'w-[18px] h-[18px]'" />
                         <span x-show="!hide"
-                            class="ml-4 text-[11px] font-black uppercase tracking-widest">Settings</span>
+                            class="ml-4 text-[11px] font-black uppercase tracking-widest">Profile</span>
                     </a>
 
-                    <a href="/restaurant/info"
+                    {{-- <a href="/restaurant/info"
                         class="{{ $isRestoActive ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20 dark:bg-amber-500 dark:text-slate-950 dark:shadow-amber-500/20' : 'text-gray-500 hover:bg-gray-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white' }} flex w-full items-center rounded-full p-3 transition-all">
                         <x-lucide-settings x-bind:class="hide ? 'mx-auto w-[22px] h-[22px]' : 'w-[18px] h-[18px]'" />
                         <span x-show="!hide"
                             class="ml-4 text-[11px] font-black uppercase tracking-widest">Settings</span>
-                    </a>
+                    </a> --}}
                 </div>
             </aside>
 

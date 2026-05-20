@@ -140,7 +140,7 @@ class ShiftController extends Controller
 
     public function historyMe(Request $request): \Illuminate\View\View
     {
-        $shifts = Shift::query()->where('user_id', $request->user()->id)
+        $shifts = Shift::query()->where('user_id', Auth::guard('web')->user()->id)
             ->where('status', 'closed')
             ->orderBy('opened_at', 'desc')
             ->get();
@@ -155,26 +155,26 @@ class ShiftController extends Controller
             'status'       => $s->status,
         ]);
 
-        return view('shift/me', ['data' => $data]);
+        return view('shift.me', ['data' => $data]);
     }
 
-    public function attendenceMe(Request $request): \Illuminate\View\View
-    {
-        $shifts = Shift::query()->where('user_id', $request->user()->id)
-            ->where('status', 'closed')
-            ->orderBy('opened_at', 'desc')
-            ->get();
+    // public function attendenceMe(Request $request): \Illuminate\View\View
+    // {
+    //     $shifts = Shift::query()->where('user_id', $request->user()->id)
+    //         ->where('status', 'closed')
+    //         ->orderBy('opened_at', 'desc')
+    //         ->get();
 
-        $data = $shifts->map(fn($s) => [
-            'id'           => $s->id,
-            'openedAt'     => $s->opened_at,
-            'closedAt'     => $s->closed_at,
-            'startingCash' => (float) $s->modal_awal + (float) $s->cash_system,
-            'cashPhysical' => $s->cash_physical,
-            'selisih'      => $s->cash_variance,
-            'status'       => $s->status,
-        ]);
+    //     $data = $shifts->map(fn($s) => [
+    //         'id'           => $s->id,
+    //         'openedAt'     => $s->opened_at,
+    //         'closedAt'     => $s->closed_at,
+    //         'startingCash' => (float) $s->modal_awal + (float) $s->cash_system,
+    //         'cashPhysical' => $s->cash_physical,
+    //         'selisih'      => $s->cash_variance,
+    //         'status'       => $s->status,
+    //     ]);
 
-        return view('attendence.me', ['data' => $data]);
-    }
+    //     return view('attendence.me', ['data' => $data]);
+    // }
 }

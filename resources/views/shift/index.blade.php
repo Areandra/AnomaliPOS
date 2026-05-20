@@ -2,7 +2,6 @@
     <x-slot:title>Riwayat Shift</x-slot:title>
     <x-slot:page_title>Management > Shifts</x-slot:page_title>
 
-
     <div x-data="shiftIndex({{ json_encode(
         $shifts->map(
                 fn($s) => [
@@ -55,11 +54,10 @@
                             class="h-[18px] w-[18px]"></i>
                         <input type="text" x-model="searchQuery" placeholder="Cari nama kasir..."
                             class="w-full border-none bg-transparent text-sm font-medium outline-none" />
-                        <button @click="$store.theme.toggle(); $nextTick(() => lucide.createIcons())"
-                            :class="isDark ? 'text-amber-400 hover:bg-slate-800' :
-                                'text-slate-600 hover:bg-white shadow-sm'"
-                            class="rounded-full transition-transform hover:scale-110 active:rotate-90">
-                            <i :data-lucide="isDark ? 'sun' : 'moon'" class="h-[18px] w-[18px]"></i>
+                        <button @click="$dispatch('toggle-theme')"
+                            class="rounded-full text-slate-600 shadow-sm transition-transform hover:scale-110 hover:bg-white active:rotate-90 dark:text-amber-400 dark:shadow-none dark:hover:bg-slate-800">
+                            <span x-show="isDark"><x-lucide-sun class="h-[18px] w-[18px]" /></span>
+                            <span x-show="!isDark"><x-lucide-moon class="h-[18px] w-[18px]" /></span>
                         </button>
                     </div>
                 </div>
@@ -202,6 +200,43 @@
                         currency: 'IDR',
                         minimumFractionDigits: 0
                     }).format(v)
+                },
+                askAI(module = 'shift_history', customPayload = null) {
+                    const payload = customPayload || {
+                        mode: 'shift_history',
+                        data: {
+                            total_records: this.history.length,
+                            active_search: this.searchQuery,
+                            displayed_records: this.filteredShifts.length,
+                            open_shifts: this.history.filter(s => s.status === 'open').length,
+                            // Ringkasan data untuk AI jika diperlukan analitik singkat
+                            shifts_summary: this.history.map(s => ({
+                                id: s.id,
+                                cashier: s.user.name,
+                                status: s.status,
+                                variance: s.selisih
+                            }))
+                        }
+                    };
+
+                    window.dispatchEvent(new CustomEvent('open-ai-modal', {
+                        detail: {
+                            module,
+                            payload
+                        }
+                    }));
+                },
+                init() {
+                    document.addEventListener('keydown', (e) => {
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                            e.preventDefault();
+                            this.askAI('shift');
+                        }
+                    });
+
+                    window.addEventListener('floating-btn-click', () => {
+                        this.askAI('shift');
+                    });
                 }
             }
         }

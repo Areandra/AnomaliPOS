@@ -1,3 +1,4 @@
+import { toPng } from "html-to-image";
 import { Activity, useEffect, useRef, useState } from "react";
 import GridLayout, { noCompactor } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
@@ -32,11 +33,8 @@ const cekIsTableLayoutChanged = (original, edited) => {
 };
 
 export default function DragLayout({
-    table,
-    onClick,
-    // baseTable,
+    table, // baseTable,
     viewMode,
-    onCLick,
 }) {
     const mapRef = useRef();
     const [newTablesData, setNewTablesData] = useState(table);
@@ -74,49 +72,23 @@ export default function DragLayout({
 
     const printTableMap = async () => {
         const mapElement = mapRef.current;
-
         if (!mapElement) return;
 
-        const originalOverflow = mapElement.style.overflow;
-        const originalHeight = mapElement.style.height;
+        try {
+            const dataUrl = await toPng(mapElement, {
+                quality: 1,
+                pixelRatio: 2,
+                backgroundColor: isDark ? "#020617" : "#ffffff",
+                cacheBust: true,
+            });
 
-        mapElement.style.overflow = "visible";
-        mapElement.style.height = "auto";
-
-        // tunggu repaint
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
-        const canvas = await html2canvas(mapElement, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: isDark ? "#020617" : "#ffffff",
-
-            width: mapElement.scrollWidth,
-            height: mapElement.scrollHeight,
-
-            windowWidth: mapElement.scrollWidth,
-            windowHeight: mapElement.scrollHeight,
-        });
-
-        // restore style
-        mapElement.style.overflow = originalOverflow;
-        mapElement.style.height = originalHeight;
-
-        // convert png
-        const image = canvas.toDataURL("image/png");
-
-        // download
-        const link = document.createElement("a");
-
-        link.href = image;
-
-        link.download = `restaurant-map-${Date.now()}.png`;
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        document.body.removeChild(link);
+            const link = document.createElement("a");
+            link.download = `restaurant-map-${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+        } catch (error) {
+            console.error("Error generating image:", error);
+        }
     };
 
     useEffect(() => {
@@ -395,15 +367,17 @@ export default function DragLayout({
                     <div
                         className={`flex items-center gap-2 p-1.5 rounded-full border shadow-inner ${isDark ? "bg-slate-950 border-white/5" : "bg-gray-100 border-gray-200"}`}
                     >
-                        <div className="flex relative bg-transparent rounded-full">
-                            {editModeList.map((item) => (
-                                <button
-                                    key={item.name}
-                                    onClick={() => {
-                                        setEditMode(item.name);
-                                        setDrag(false);
-                                    }}
-                                    className={`
+                        {!viewMode ? (
+                            <>
+                                <div className="flex relative bg-transparent rounded-full">
+                                    {editModeList.map((item) => (
+                                        <button
+                                            key={item.name}
+                                            onClick={() => {
+                                                setEditMode(item.name);
+                                                setDrag(false);
+                                            }}
+                                            className={`
                       relative px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 z-10
                       ${
                           editMode === item.name && !drag
@@ -415,26 +389,26 @@ export default function DragLayout({
                                 : "text-gray-500 hover:text-gray-700"
                       }
                     `}
-                                >
-                                    {editMode === item.name &&
-                                        !drag &&
-                                        isDark && (
-                                            <span className="absolute inset-0 bg-slate-800 rounded-full -z-10 border border-white/5 shadow-xl" />
-                                        )}
-                                    <div className="flex items-center gap-2">
-                                        {item.icon} {item.placeholder}
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+                                        >
+                                            {editMode === item.name &&
+                                                !drag &&
+                                                isDark && (
+                                                    <span className="absolute inset-0 bg-slate-800 rounded-full -z-10 border border-white/5 shadow-xl" />
+                                                )}
+                                            <div className="flex items-center gap-2">
+                                                {item.icon} {item.placeholder}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
 
-                        <div
-                            className={`w-px h-6 mx-1 ${isDark ? "bg-white/10" : "bg-gray-300"}`}
-                        />
+                                <div
+                                    className={`w-px h-6 mx-1 ${isDark ? "bg-white/10" : "bg-gray-300"}`}
+                                />
 
-                        <button
-                            onClick={() => setDrag(!drag)}
-                            className={`
+                                <button
+                                    onClick={() => setDrag(!drag)}
+                                    className={`
                   px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all
                   ${
                       isDark
@@ -446,11 +420,30 @@ export default function DragLayout({
                             : "text-gray-600 hover:bg-white"
                   }
                 `}
-                        >
-                            <div className="flex items-center gap-2">
-                                <LayoutGrid size={14} /> Drag
-                            </div>
-                        </button>
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <LayoutGrid size={14} /> Drag
+                                    </div>
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => setDrag(!drag)}
+                                    className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all
+                                        ${
+                                            isDark
+                                                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                                                : "bg-slate-800 text-white"
+                                        }
+                                    `}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <LayoutGrid size={14} /> Select Table
+                                    </div>
+                                </button>
+                            </>
+                        )}
 
                         <div
                             className={`w-px h-6 mx-1 ${isDark ? "bg-white/10" : "bg-gray-300"}`}
@@ -536,7 +529,7 @@ export default function DragLayout({
                         (window.innerWidth - (window.innerWidth * 2.5) / 100) *
                             5,
                     )}
-                    dragConfig={{ enabled: drag }}
+                    dragConfig={{ enabled: viewMode ? !viewMode : drag }}
                     onLayoutChange={(newLayout) => {
                         setLayout(newLayout);
                         if (!setNewTablesData) return;
@@ -564,7 +557,17 @@ export default function DragLayout({
                                     capacity={currentTable.capacity}
                                     tableNumber={currentTable.tableNumber}
                                     onClick={() => {
-                                        if (onClick) onClick(currentTable);
+                                        if (viewMode) {
+                                            console.log("cepatt");
+                                            return window.dispatchEvent(
+                                                new CustomEvent(
+                                                    "select-table",
+                                                    {
+                                                        detail: currentTable,
+                                                    },
+                                                ),
+                                            );
+                                        }
                                         if (drag) return;
                                         switch (editMode) {
                                             case "information":

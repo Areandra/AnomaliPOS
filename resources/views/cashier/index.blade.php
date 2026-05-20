@@ -37,6 +37,7 @@
 
         <x-receipt-modal />
         <x-qr-modal />
+
     </div>
 
 </x-cashier-layout>
@@ -54,6 +55,244 @@
             search: '',
             openCloseModal: false,
             plan: '{{ session('restaurant_plan', 'starter') }}',
+
+            askAI(module = 'cashier', customPayload = null) {
+                // Auto-generate payload dari data cashier yang aktif
+                const payload = customPayload || {
+                    // Data orders aktif
+                    meta: {
+                        source: 'cashier_pos',
+                        module,
+                        generated_at: new Date().toISOString(),
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        restaurant_plan: this.plan,
+                        ai_rules: {
+                            no_assumption: true,
+                            no_hallucination: true,
+                            require_real_data: true,
+                            fallback_if_missing: true
+                        }
+                    },
+
+                    shift: this.shift ? {
+                        id: this.shift.id,
+                        start_time: this.shift.start_time,
+                        duration_hours: this.shift.start_time ?
+                            Math.round(
+                                ((new Date() - new Date(this.shift.start_time)) / 3600000) * 10
+                            ) / 10 : 0,
+                        cashier_name: this.shift.user?.name ?? null,
+                        starting_cash: this.shift.starting_cash ?? null,
+                        current_cash: this.shift.current_cash ?? null,
+                        total_transactions: this.shift.total_transactions ?? null,
+                        total_sales: this.shift.total_sales ?? null,
+                        status: this.shift.status ?? 'active'
+                    } : null,
+
+                    ui_state: {
+                        selected_order_id: this.selectedOrderId,
+                        selected_category: this.categorySelect,
+                        selected_category_name: this.categorySelect === -1 ?
+                            'all' : this.categories.find(c => c.id === this.categorySelect)?.name ?? null,
+                        search_query: this.search || null
+                    },
+
+                    summary: {
+                        total_categories: this.categories.length,
+                        total_menu_items: this.menuItems.length,
+                        total_active_orders: this.orders.length,
+                        unpaid_orders: this.orders.filter(o => !o.payment).length,
+                        paid_orders: this.orders.filter(o => o.payment).length,
+                        occupied_tables: [
+                            ...new Set(
+                                this.orders
+                                .map(o => o.table?.table_number)
+                                .filter(Boolean)
+                            )
+                        ],
+                        occupied_tables_count: [
+                            ...new Set(
+                                this.orders
+                                .map(o => o.table?.table_number)
+                                .filter(Boolean)
+                            )
+                        ].length,
+                        average_wait_time_minutes: this.calculateAverageWaitTime()
+                    },
+
+                    categories: this.categories.map(cat => ({
+                        id: cat.id,
+                        name: cat.name,
+                        sort_order: cat.sort_order,
+                        total_items: this.menuItems.filter(
+                            m => m.category_id === cat.id
+                        ).length
+                    })),
+
+                    menu_catalog: this.menuItems.map(menu => ({
+                        id: menu.id,
+                        name: menu.name,
+                        description: menu.description,
+                        price: Number(menu.price),
+                        category_id: menu.category_id,
+                        category_name: this.categories.find(c => c.id === menu.category_id)?.name ??
+                            null,
+                        is_available: menu.is_available,
+                        image_url: menu.image_url ?? null
+                    })),
+
+                    active_orders: this.orders.map(order => ({
+                        id: order.id,
+                        order_code: order.order_code,
+                        status: order.status,
+                        created_at: order.created_at,
+
+                        duration_minutes: Math.round(
+                            (new Date() - new Date(order.created_at)) / 60000
+                        ),
+
+                        table: order.table ? {
+                            table_number: order.table.table_number
+                        } : null,
+
+                        payment: order.payment ? {
+                            status: 'paid',
+                            method: order.payment.payment_method ?? null,
+                            amount: order.payment.amount ?? null,
+                            paid_at: order.payment.created_at ?? null
+                        } : {
+                            status: 'unpaid'
+                        },
+
+                        items: (order.items || []).map(item => ({
+                            id: item.id,
+
+                            menu_item_id: item.menu_item?.id ??
+                                item.menuItem?.id ??
+                                null,
+
+                            name: item.name ??
+                                item.menu_item?.name ??
+                                item.menuItem?.name ??
+                                null,
+
+                            qty: Number(item.quantity || 0),
+
+                            price: Number(item.price || 0),
+
+                            subtotal: Number(item.quantity || 0) *
+                                Number(item.price || 0),
+
+                            notes: item.notes ?? null,
+
+                            status: item.status ?? null,
+
+                            category: item.menu_item?.category?.name ??
+                                item.menuItem?.category?.name ??
+                                null
+                        })),
+
+                        totals: {
+                            total_items: (order.items || []).reduce(
+                                (sum, item) => sum + Number(item.quantity || 0),
+                                0
+                            ),
+
+                            total_unique_items: (order.items || []).length,
+
+                            subtotal: (order.items || []).reduce(
+                                (sum, item) =>
+                                sum +
+                                (Number(item.quantity || 0) *
+                                    Number(item.price || 0)),
+                                0
+                            ),
+
+                            estimated_total: order.total ??
+                                order.total_price ??
+                                null
+                        }
+                    })),
+
+                    selected_order: this.selectedOrder ? {
+                        id: this.selectedOrder.id,
+                        order_code: this.selectedOrder.order_code,
+                        status: this.selectedOrder.status,
+                        created_at: this.selectedOrder.created_at,
+
+                        table: this.selectedOrder.table ? {
+                            id: this.selectedOrder.table.id ?? null,
+                            table_number: this.selectedOrder.table.table_number
+                        } : null,
+
+                        notes: this.selectedOrder.notes ?? null,
+
+                        total: this.selectedOrder.total ??
+                            this.selectedOrder.total_price ??
+                            null,
+
+                        subtotal: this.selectedOrder.subtotal ?? null,
+
+                        tax: this.selectedOrder.tax ?? null,
+
+                        discount: this.selectedOrder.discount ?? null,
+
+                        items: (this.selectedOrder.items || []).map(item => ({
+                            id: item.id,
+
+                            menu_item_id: item.menu_item?.id ??
+                                item.menuItem?.id ??
+                                null,
+
+                            name: item.name ??
+                                item.menu_item?.name ??
+                                item.menuItem?.name ??
+                                null,
+
+                            quantity: item.quantity,
+
+                            price: item.price,
+
+                            subtotal: Number(item.quantity || 0) *
+                                Number(item.price || 0),
+
+                            notes: item.notes ?? null,
+
+                            status: item.status ?? null,
+
+                            category: item.menu_item?.category?.name ??
+                                item.menuItem?.category?.name ??
+                                null
+                        })),
+
+                        payment: this.selectedOrder.payment ? {
+                            method: this.selectedOrder.payment.payment_method ?? null,
+                            amount: this.selectedOrder.payment.amount ?? null,
+                            paid_at: this.selectedOrder.payment.created_at ?? null
+                        } : null
+                    } : null,
+                };
+
+                // Panggil function global openAiModal
+                window.dispatchEvent(new CustomEvent('open-ai-modal', {
+                    detail: {
+                        module,
+                        payload
+                    }
+                }));
+            },
+
+            // Helper method untuk hitung rata-rata waktu tunggu
+            calculateAverageWaitTime() {
+                const activeOrders = this.orders.filter(o => o.status !== 'completed');
+                if (activeOrders.length === 0) return 0;
+
+                const totalWait = activeOrders.reduce((sum, order) => {
+                    return sum + (new Date() - new Date(order.created_at)) / 60000;
+                }, 0);
+
+                return Math.round(totalWait / activeOrders.length);
+            },
 
             get atLeastPro() {
                 return this.plan !== 'starter';
@@ -195,6 +434,16 @@
 
             init() {
                 this.$watch('selectedOrderId', id => this.fetchOrder(id));
+                document.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        this.askAI('cashier'); // atau 'general'
+                    }
+                });
+
+                window.addEventListener('floating-btn-click', () => {
+                    this.askAI('cashier'); // atau 'general'
+                });
             }
         }
     }

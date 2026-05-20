@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('restaurant_uid')->unique();
             $table->string('name');
-            $table->enum('plan', ['starter', 'pro', 'enterprise']);
+            $table->enum('plan', ['pro', 'starter', 'enterprise']);
             $table->string('avatar_url')->nullable();
             $table->enum('status', ['active', 'disabled']);
             $table->string('pin');

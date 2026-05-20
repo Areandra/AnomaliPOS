@@ -1,3 +1,25 @@
+@php
+    $tableData = $data
+        ->map(
+            fn($t) => [
+                'id' => $t['id'],
+                'tableNumber' => $t['table_number'],
+                'capacity' => $t['capacity'],
+                'status' => $t['status'],
+                'facing' => $t['facing'],
+                'vertical' => $t['vertical'],
+                'positionX' => $t['position_x'] ?? 0,
+                'positionY' => $t['position_y'] ?? 0,
+            ],
+        )
+        ->values();
+
+    $tableMapProps = [
+        'table' => $tableData,
+        'viewMode' => true,
+    ];
+@endphp
+
 <x-cashier-layout :currentShift="$currentShift" pageTitle="Point Of Sale > New Order">
 
     @slot('headerLinks')
@@ -83,50 +105,7 @@
                 {{-- Floor Map --}}
                 <div class="relative flex-1 overflow-hidden transition-colors duration-500"
                     :class="isDark ? 'bg-slate-950' : 'bg-slate-100'">
-
-                    {{-- Status Legend --}}
-                    <div class="absolute bottom-6 left-8 z-10 rounded-2xl border px-4 py-2.5 shadow-2xl backdrop-blur-xl transition-all"
-                        :class="isDark ? 'bg-slate-900/80 border-white/5 text-gray-400' :
-                            'bg-white/80 border-gray-100 text-gray-500'">
-                        <div class="flex flex-col gap-1">
-                            <div class="flex items-center gap-2">
-                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
-                                <span
-                                    class="text-[9px] font-bold uppercase tracking-tighter opacity-50">Available</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <div class="h-2 w-2 rounded-full bg-red-500"></div>
-                                <span class="text-[9px] font-bold uppercase tracking-tighter opacity-50">Occupied</span>
-                            </div>
-                            <div class="mx-1 h-px w-full" :class="isDark ? 'bg-white/10' : 'bg-gray-300'"></div>
-                            <div class="flex items-center gap-2">
-                                <div class="h-2 w-2 animate-pulse rounded-full"
-                                    :class="isDark ? 'bg-amber-500' : 'bg-orange-500'"></div>
-                                <span class="text-[9px] font-bold uppercase tracking-tighter opacity-50"
-                                    x-text="tables.length + ' Registered Tables'"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Table Grid --}}
-                    <div class="no-scrollbar h-full overflow-auto p-8">
-                        <div class="flex flex-wrap gap-4">
-                            <template x-for="table in tables" :key="table.id">
-                                <button @click="selectTable(table)"
-                                    class="relative flex h-28 w-28 flex-col items-center justify-center gap-1 rounded-3xl border-2 font-black transition-all duration-300 hover:scale-105 active:scale-95"
-                                    :class="isOccupied(table) ?
-                                        (isDark ? 'bg-red-500/10 border-red-500/40 text-red-400' :
-                                            'bg-red-50 border-red-200 text-red-600') :
-                                        (isDark ? 'bg-green-500/10 border-green-500/40 text-green-400' :
-                                            'bg-green-50 border-green-200 text-green-600')">
-                                    <span class="text-2xl font-black" x-text="table.table_number"></span>
-                                    <span class="text-[9px] uppercase tracking-widest opacity-60"
-                                        x-text="isOccupied(table) ? 'Occupied' : 'Available'"></span>
-                                    <span class="text-[9px] opacity-40" x-text="table.capacity + ' pax'"></span>
-                                </button>
-                            </template>
-                        </div>
-                    </div>
+                    <div id="table-map-react" data-props='@json($tableMapProps)' class="h-full w-full"></div>
                 </div>
             </div>
 
@@ -178,7 +157,7 @@
                                                 <p class="text-[9px] font-black uppercase opacity-40">Guests</p>
                                                 <p class="text-xl font-black"
                                                     :class="isDark ? 'text-white' : 'text-slate-900'"
-                                                    x-text="(selectedTable?.orders?.[0]?.guest ?? 'N/A') + ' Pax'"></p>
+                                                    x-text="(activeSession?.guest ?? 'N/A') + ' Pax'"></p>
                                             </div>
                                             <div>
                                                 <p class="text-[9px] font-black uppercase opacity-40">Status</p>
@@ -194,8 +173,7 @@
                                         @csrf
                                         {{-- Input hidden dinamis --}}
                                         <input type="hidden" name="tableId" :value="selectedTable.id">
-                                        <input type="hidden" name="guest"
-                                            :value="selectedTable?.orders?.[0]?.guest">
+                                        <input type="hidden" name="guest" :value="activeSession?.guest">
                                         <input type="hidden" name="type" :value="orderType">
                                         <template x-if="isKillSessionAction">
                                             <input type="hidden" name="_method" value="POST">
@@ -416,6 +394,12 @@
                         alert('Klik tombol sekali lagi untuk konfirmasi');
                         this.endSessionToken = sessionToken;
                     }
+                },
+
+                init() {
+                    window.addEventListener('select-table', (e) => {
+                        this.selectTable(e.detail);
+                    });
                 }
             }
         }

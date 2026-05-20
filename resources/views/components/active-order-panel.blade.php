@@ -1,10 +1,8 @@
 @props([
     'categories' => [], // Kumpulan data kategori menu dari controller/backend
-    'isDark' => true, // Default tema tampilan panel
 ])
 
 <div class="flex h-full overflow-hidden" x-data="{
-    isDark: {{ json_encode($isDark) }},
     search: '',
     categorySelect: -1,
     // Properti bawaan untuk mematikan pengecekan berlebih di client side jika dibutuhkan

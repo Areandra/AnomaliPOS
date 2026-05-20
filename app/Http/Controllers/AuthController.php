@@ -270,13 +270,13 @@ class AuthController extends Controller
             return redirect()->to('/login')->with('error', 'Tautan kedaluwarsa atau tidak valid.');
         }
 
-        $userId = $request->route('userId');
+        $userId = $request->input('userId');
         $user = User::findOrFail($userId);
 
         // 2. Simpan izin restriksi di session
         $request->session()->put('password_reset_allowed_id', $user->id);
 
-        return view('auth.request-reset-password-form', [
+        return view('auth.reset-password', [
             'userName' => $user->name,
             'userId' => $user->id,
         ]);

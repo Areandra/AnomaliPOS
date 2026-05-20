@@ -14,7 +14,7 @@ class UserService
     {
         return User::query()
             ->where('id', '!=', $meId)
-            ->where('restaurant_id', '==', $rId)
+            ->where('restaurant_id', '=', $rId)
             ->orderByDesc('id')
             ->get();
     }

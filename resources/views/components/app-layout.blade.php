@@ -32,6 +32,22 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        .floating-btn {
+            position: fixed;
+            z-index: 9999;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .floating-btn:active {
+            cursor: grabbing;
+        }
+
+        .floating-btn.snapping {
+            transition: left 0.3s ease-out;
+        }
     </style>
 </head>
 
@@ -41,10 +57,155 @@
     {{-- Notification Stack Global --}}
     <x-notification />
 
-    {{-- Slot langsung merujuk ke dimensi body tanpa terhalang div antara --}}
+    <x-ai-assistant-panel />
+
+    {{-- Floating Button --}}
+    <div x-data="floatingBtn" x-init="init" class="floating-btn"
+        :style="'left: ' + x + 'px; top: ' + y + 'px;'" @mousedown.prevent="startDrag" @touchstart.prevent="startDrag"
+        @click="onClick">
+
+        <button x-show="disableButton"
+            class="flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110"
+            :class="isDark ? 'bg-amber-500 text-slate-950' : 'bg-amber-500 text-white'">
+            <i data-lucide="sparkles" class="h-6 w-6"></i>
+        </button>
+    </div>
+
     {{ $slot }}
 
     <script>
+        // ===== CARA MUDAH DAFTAR EVENT =====
+        // Cukup pakai ini di komponen manapun:
+        // window.addEventListener('floating-btn-click', (e) => { ... })
+
+        function floatingBtn() {
+            return {
+                x: window.innerWidth - 80,
+                y: window.innerHeight - 100,
+                dragging: false,
+                startX: 0,
+                startY: 0,
+                moved: false,
+                disableButton: false,
+
+                init() {
+                    // Load posisi tersimpan
+                    const saved = localStorage.getItem('fbPos');
+                    if (saved) {
+                        const pos = JSON.parse(saved);
+                        this.x = pos.x;
+                        this.y = pos.y;
+                    }
+
+                    const routesAllowedAi = ['/cashier', '/dashboard', '/shifts', '/kitchen'];
+
+                    this.disableButton = routesAllowedAi.some(route =>
+                        window.location.pathname === route
+                    );
+
+                    // Global event listeners
+                    window.addEventListener('mousemove', (e) => this.drag(e));
+                    window.addEventListener('mouseup', () => this.stopDrag());
+                    window.addEventListener('touchmove', (e) => this.drag(e), {
+                        passive: false
+                    });
+                    window.addEventListener('touchend', () => this.stopDrag());
+                    window.addEventListener('open-ai-modal-closed', (e) => this.disableButton = e.detail);
+                    window.addEventListener('open-ai-modal-opened', (e) => this.disableButton = e.detail);
+                },
+
+                startDrag(e) {
+                    this.dragging = true;
+                    this.moved = false;
+
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                    this.startX = clientX - this.x;
+                    this.startY = clientY - this.y;
+
+                    this.$el.classList.remove('snapping');
+                },
+
+                drag(e) {
+                    if (!this.dragging) return;
+
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                    let newX = clientX - this.startX;
+                    let newY = clientY - this.startY;
+
+                    // Batasi dalam viewport
+                    newX = Math.max(0, Math.min(newX, window.innerWidth - 56));
+                    newY = Math.max(0, Math.min(newY, window.innerHeight - 56));
+
+                    if (Math.abs(newX - this.x) > 3 || Math.abs(newY - this.y) > 3) {
+                        this.moved = true;
+                    }
+
+                    this.x = newX;
+                    this.y = newY;
+
+                    if (e.touches) e.preventDefault();
+                },
+
+                stopDrag() {
+                    if (!this.dragging) return;
+                    this.dragging = false;
+
+                    // SNAP KE POJOK HORIZONTAL TERDEKAT
+                    const btnCenter = this.x + 28; // center button
+                    const screenCenter = window.innerWidth / 2;
+
+                    this.$el.classList.add('snapping');
+
+                    if (btnCenter < screenCenter) {
+                        this.x = 10; // snap kiri
+                    } else {
+                        this.x = window.innerWidth - 66; // snap kanan
+                    }
+
+                    // Simpan posisi
+                    localStorage.setItem('fbPos', JSON.stringify({
+                        x: this.x,
+                        y: this.y
+                    }));
+
+                    // ==== EVENT SIMPLE ====
+                    // Kirim event yang bisa didengar siapa saja
+                    window.dispatchEvent(new CustomEvent('floating-btn-drag-end', {
+                        detail: {
+                            x: this.x,
+                            y: this.y,
+                            moved: this.moved
+                        }
+                    }));
+                },
+
+                onClick(e) {
+                    if (this.moved) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                    }
+
+                    // ==== EVENT SIMPLE ====
+                    // Event saat klik, tinggal pakai ini di komponen lain
+                    window.dispatchEvent(new CustomEvent('floating-btn-click'));
+                }
+            }
+        }
+
+        function openAiModal(module, payload) {
+            window.dispatchEvent(new CustomEvent('open-ai-modal', {
+                detail: {
+                    module,
+                    payload
+                }
+            }));
+        }
+
         function globalAppManager() {
             return {
                 isDark: false,
@@ -52,11 +213,8 @@
 
                 init() {
                     const savedTheme = localStorage.getItem('theme');
-                    if (savedTheme !== null) {
-                        this.isDark = savedTheme === 'dark';
-                    } else {
-                        this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    }
+                    this.isDark = savedTheme ? savedTheme === 'dark' :
+                        window.matchMedia('(prefers-color-scheme: dark)').matches;
 
                     this.$watch('isDark', value => {
                         localStorage.setItem('theme', value ? 'dark' : 'light');
@@ -75,9 +233,7 @@
 
                 toggleFullscreen() {
                     if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen().catch(err => {
-                            console.error(`Gagal Fullscreen: ${err.message}`);
-                        });
+                        document.documentElement.requestFullscreen();
                     } else {
                         document.exitFullscreen();
                     }
@@ -86,105 +242,6 @@
         }
 
         document.addEventListener('alpine:init', () => {
-            Alpine.data('qrModalData', (orderData) => ({
-                isOpen: true, // Anda bisa set false jika ingin dibuka lewat event browser
-                order: orderData,
-                qrDataUrl: '',
-
-                init() {
-                    // Otomatis men-generate QR Code saat modal muncul/di-init
-                    if (!this.order?.session?.sessionToken) return;
-
-                    const token = this.order.session.sessionToken;
-                    const url =
-                        `${window.location.protocol}//${window.location.host}/order/session/${token}`;
-
-                    QRCode.toDataURL(url, {
-                        errorCorrectionLevel: 'M',
-                        margin: 4,
-                        width: 220,
-                        color: {
-                            dark: '#000000',
-                            light: '#ffffff',
-                        }
-                    }, (err, dataUrl) => {
-                        if (!err) {
-                            this.qrDataUrl = dataUrl;
-                        } else {
-                            console.error('QR Generation Error:', err);
-                        }
-                    });
-                },
-
-                formatDate(dateString) {
-                    if (!dateString) return '';
-                    return new Intl.DateTimeFormat('id-ID', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                    }).format(new Date(dateString));
-                },
-
-                printQR() {
-                    let iframe = document.getElementById('print-iframe');
-                    if (!iframe) {
-                        iframe = document.createElement('iframe');
-                        iframe.id = 'print-iframe';
-                        Object.assign(iframe.style, {
-                            position: 'absolute',
-                            width: '0px',
-                            height: '0px',
-                            border: 'none',
-                            visibility: 'hidden',
-                        });
-                        document.body.appendChild(iframe);
-                    }
-
-                    const doc = iframe.contentWindow?.document;
-                    if (!doc) return;
-
-                    const printContent = this.$refs.printArea.innerHTML;
-
-                    doc.open();
-                    doc.write(`
-                        <html>
-                          <head>
-                            <title>Print Receipt</title>
-                            <style>
-                              * { box-sizing: border-box; margin: 0; padding: 0; }
-                              @page { size: auto; margin: 0; }
-                              body {
-                                font-family: 'Courier New', Courier, monospace;
-                                width: 80mm;
-                                padding: 10mm;
-                                font-size: 12px;
-                                color: #000;
-                              }
-                              .text-center { text-align: center; }
-                              .flex { display: flex; justify-content: space-between; }
-                              .font-bold { font-weight: bold; }
-                              .uppercase { text-transform: uppercase; }
-                              .dashed { border-top: 1px dashed #000; margin: 10px 0; }
-                              .w-full { width: 100%; }
-                              .absolute, .opacity-10, .bg-\\[url\\(.*?\\)\\] { display: none; }
-                            </style>
-                          </head>
-                          <body>${printContent}</body>
-                        </html>
-                    `);
-                    doc.close();
-
-                    setTimeout(() => {
-                        iframe.contentWindow?.focus();
-                        iframe.contentWindow?.print();
-                    }, 500);
-                },
-
-                closeModal() {
-                    this.isOpen = false;
-                    // Memicu event custom jika ada element luar yang mendengarkan close modal ini
-                    this.$dispatch('close-qr-modal');
-                }
-            }));
 
             Alpine.store('notifs', {
                 items: [],

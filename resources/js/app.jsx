@@ -5,7 +5,7 @@ import QRCode from "qrcode";
 
 window.QRCode = QRCode;
 
-if (window.location.href.includes("tables")) {
+if (window.location.href.includes("tables") || window.location.href.includes("start")) {
     window.DragLayout = DragLayout;
 
     // Jalankan setelah DOM sepenuhnya loaded

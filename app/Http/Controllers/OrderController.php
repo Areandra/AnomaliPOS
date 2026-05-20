@@ -122,6 +122,7 @@ class OrderController extends Controller
                 'token'         => Str::uuid(),
                 'started_at'    => now(),
                 'is_active'     => true,
+                'guest'         => $guest,
             ]);
 
             $table->update([

@@ -16,8 +16,6 @@
 
     $tableMapProps = [
         'table' => $tableData,
-        'drag' => false,
-        'editMode' => 'information',
     ];
 @endphp
 

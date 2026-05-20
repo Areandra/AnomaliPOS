@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -8,32 +8,17 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 }
 
-@utility scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-.no-scrollbar,
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-.no-scrollbar::-webkit-scrollbar,
-.scrollbar-hide::-webkit-scrollbar {
+*::-webkit-scrollbar {
     display: none;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-    background-color: transparent !important;
-    outline: none !important;
-    box-shadow: none !important;
+* {
+    -ms-overflow-style: none; /* IE dan Edge */
+    scrollbar-width: none; /* Firefox */
 }
-
-

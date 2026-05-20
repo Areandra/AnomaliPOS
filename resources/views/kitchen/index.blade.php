@@ -68,8 +68,8 @@
         </div>
     </x-slot:header_links>
 
-    {{-- Main Content langsung di-render tanpa bungkus @section --}}
-    <div x-data="kotBoard({{ json_encode($kotsData ?? []) }}, {{ json_encode($categoriesData ?? []) }})" x-init="$nextTick(() => lucide.createIcons())" class="flex h-full flex-col">
+    {{-- Main Content: x-data dipanggil tanpa parameter --}}
+    <div x-data="kotBoard()" class="flex h-full flex-col">
         {{-- Glow Background (Dark Mode) --}}
         <template x-if="isDark">
             <div class="pointer-events-none fixed inset-0 opacity-20">
@@ -131,7 +131,7 @@
                     <div :class="isDark ? 'bg-white/10' : 'bg-gray-300'" class="mx-1 h-6 w-px"></div>
 
                     <button @click="$dispatch('toggle-theme')"
-                        class="rounded-full text-slate-600 shadow-sm transition-transform hover:scale-110 hover:bg-white active:rotate-90 dark:text-amber-400 dark:shadow-none dark:hover:bg-slate-800 p-2">
+                        class="rounded-full p-2 text-slate-600 shadow-sm transition-transform hover:scale-110 hover:bg-white active:rotate-90 dark:text-amber-400 dark:shadow-none dark:hover:bg-slate-800">
                         <span x-show="isDark"><x-lucide-sun class="h-[18px] w-[18px]" /></span>
                         <span x-show="!isDark"><x-lucide-moon class="h-[18px] w-[18px]" /></span>
                     </button>
@@ -209,11 +209,11 @@
     </div>
 
     <script>
-        function kotBoard(kotsData, categoriesData) {
-            console.log(kotsData)
+        function kotBoard() {
             return {
-                kots: kotsData,
-                categories: categoriesData,
+                // Injeksi data PHP langsung ke dalam scope JS (sama seperti dashboard)
+                kots: @json($kotsData ?? []),
+                categories: @json($categoriesData ?? []),
                 viewMode: 'active',
                 groupMode: 'flat',
                 categorySelect: -1,
@@ -261,7 +261,6 @@
                         })
 
                         if (res.ok) {
-                            // Update data lokal agar UI berubah tanpa reload
                             const itemIdx = this.kots.findIndex(k => k.order_item?.id === id)
                             if (itemIdx !== -1) {
                                 this.kots[itemIdx].order_item.status = newStatus
@@ -277,10 +276,7 @@
                 renderKotCard(kot) {
                     if (!kot.order_item) return ''
 
-                    // AMBIL DARI SCOPE ELEMENT YANG SEDANG AKTIF (Mewarisi globalAppManager)
-                    // 'this' di sini merujuk ke object return dari kotBoard yang berada di bawah scope globalAppManager
                     const isDark = this.isDark;
-
                     const isDone = kot.status === 'done'
                     const nextStatus = (s) => {
                         const flow = ['cart', 'ordered', 'cooking', 'ready', 'delivered']
@@ -330,30 +326,80 @@
                 </span>
             </div>
             ${kot.order_item.notes ? `
-                        <div class="mt-3 space-y-1">
-                            ${kot.order_item.notes.split('. ').map(n => `
+                            <div class="mt-3 space-y-1">
+                                ${kot.order_item.notes.split('. ').map(n => `
                         <div class="text-xs flex items-start gap-1.5 ${isDark ? 'text-red-300' : 'text-red-600'} font-bold">
                             <span class="mt-0.5 text-[8px]">●</span> ${n}
                         </div>
                     `).join('')}
-                        </div>
-                    ` : ''}
+                            </div>
+                        ` : ''}
         </div>
 
         ${!isDone ? `
-                    <button onclick="Alpine.$data(this.closest('[x-data]')).updateStatus(${kot.order_item.id}, '${kot.order_item.status}')"
-                            class="flex items-center w-full justify-center p-3 gap-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${isDark ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'}">
-                        <span class="opacity-70">${kot.order_item.status}</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        <span>${nextStatus(kot.order_item.status)}</span>
-                    </button>
-                ` : `
-                    <div class="mt-auto text-center py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 ${isDark ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-green-50 text-green-600 border border-green-200'}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg> Completed
-                    </div>
-                `}
+                        <button onclick="Alpine.$data(this.closest('[x-data]')).updateStatus(${kot.order_item.id}, '${kot.order_item.status}')"
+                                class="flex items-center w-full justify-center p-3 gap-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${isDark ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'}">
+                            <span class="opacity-70">${kot.order_item.status}</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            <span>${nextStatus(kot.order_item.status)}</span>
+                        </button>
+                    ` : `
+                        <div class="mt-auto text-center py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 ${isDark ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-green-50 text-green-600 border border-green-200'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg> Completed
+                        </div>
+                    `}
     </div>
     `
+                },
+
+                // Metode Ask AI
+                askAI(module = 'kitchen_display', customPayload = null) {
+                    const payload = customPayload || {
+                        mode: 'kitchen_display',
+                        data: {
+                            total_kots: this.kots.length,
+                            active_kots: this.filteredKots.length,
+                            view_mode: this.viewMode,
+                            group_mode: this.groupMode,
+                            kots_summary: this.kots.map(k => ({
+                                id: k.id,
+                                status: k.status,
+                                table: k.order?.table?.table_number ?? 'N/A',
+                                menu: k.order_item?.menu_item?.name ?? 'Unknown',
+                                qty: k.order_item?.quantity ?? 0
+                            }))
+                        }
+                    };
+
+                    window.dispatchEvent(new CustomEvent('open-ai-modal', {
+                        detail: {
+                            module,
+                            payload
+                        }
+                    }));
+                },
+
+                // Inisialisasi Alpine
+                init() {
+                    // Eksekusi render icon Lucide dari yang sebelumnya di HTML x-init
+                    this.$nextTick(() => {
+                        if (window.lucide) {
+                            window.lucide.createIcons();
+                        }
+                    });
+
+                    // Shortcut Ctrl + K atau CMD + K
+                    document.addEventListener('keydown', (e) => {
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                            e.preventDefault();
+                            this.askAI('kitchen');
+                        }
+                    });
+
+                    // Event dari tombol floating AI
+                    window.addEventListener('floating-btn-click', () => {
+                        this.askAI('kitchen');
+                    });
                 }
             }
         }

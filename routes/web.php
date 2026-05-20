@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -153,8 +154,11 @@ Route::get('/change-password', [AuthController::class, 'showChangePassword'])->n
 
 Route::middleware(['auth', 'auth.restaurant', 'tenant.context'])->group(function () {
 
+    Route::get('/', function () {
+        return response()->redirectTo('/dashboard');
+    });
 
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // ========================================================================
     // USER MANAGEMENT
     // ========================================================================
@@ -167,6 +171,11 @@ Route::middleware(['auth', 'auth.restaurant', 'tenant.context'])->group(function
             UserController::class,
             'index'
         ])->name('users.index');
+
+        Route::get('/me', [
+            UserController::class,
+            'me'
+        ])->name('users.me');
 
         Route::get('/users/create', [
             UserController::class,
@@ -252,9 +261,9 @@ Route::middleware(['auth', 'auth.restaurant', 'tenant.context'])->group(function
 
     Route::middleware(['plan.acsess'])->group(function () {
         Route::get('/shifts', [ShiftController::class, 'history'])->name('shifts.index');
+        Route::get('/shifts/me', [ShiftController::class, 'historyMe'])->name('shifts.me');
         Route::get('/shifts/{id}', [ShiftController::class, 'show'])->name('shifts.show');
         Route::delete('/shifts/{id}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
-        Route::get('/shifts/me', [ShiftController::class, 'historyMe'])->name('shifts.me');
         Route::get('/attendance/me', [ShiftController::class, 'attendenceMe'])->name('attendance.me');
     });
 
@@ -333,7 +342,10 @@ Route::prefix('order')
                 Route::post('/session/{sessionToken}/update-qty', [CostumerController::class, 'updateQty']);
                 Route::post('/session/{sessionToken}/delete-item', [CostumerController::class, 'deleteItem']);
                 Route::post('/session/{sessionToken}/place-order', [CostumerController::class, 'placeOrder']);
-
             });
         });
     });
+
+Route::middleware(['auth', 'auth.restaurant'])->group(function () {
+    Route::post('/ai-engine/process', [AiController::class, 'processEngine'])->name('ai.engine.process');
+});
