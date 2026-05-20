@@ -551,7 +551,7 @@ export default function DragLayout({
                                 className={`text-white rounded flex flex-col ${drag ? "cursor-grab active:cursor-grabbing" : ""}`}
                             >
                                 <TableComponent
-                                    session={currentTable?.session?.[0]}
+                                    session={currentTable.status == "occupied" ? true : false}
                                     vertical={currentTable.vertical}
                                     berhadapan={currentTable.facing}
                                     capacity={currentTable.capacity}

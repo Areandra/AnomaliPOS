@@ -24,10 +24,23 @@
 }
 
 input:focus,
-textarea:focus,
-select:focus {
+textarea:focus {
     background: transparent !important;
     color: white !important;
     outline: none !important;
     box-shadow: none !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    -webkit-text-fill-color: white !important;
+    caret-color: white;
+
+    -webkit-box-shadow: 0 0 0px 1000px #0b1120 inset !important;
+    box-shadow: 0 0 0px 1000px #0b1120 inset !important;
+
+    transition: background-color 5000s ease-in-out 0s;
 }

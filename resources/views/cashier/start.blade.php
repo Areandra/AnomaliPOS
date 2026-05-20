@@ -10,6 +10,8 @@
                 'vertical' => $t['vertical'],
                 'positionX' => $t['position_x'] ?? 0,
                 'positionY' => $t['position_y'] ?? 0,
+                'table_sessions' => $t['table_sessions'],
+
             ],
         )
         ->values();
@@ -399,6 +401,7 @@
                 init() {
                     window.addEventListener('select-table', (e) => {
                         this.selectTable(e.detail);
+                        console.log(e.detail);
                     });
                 }
             }
