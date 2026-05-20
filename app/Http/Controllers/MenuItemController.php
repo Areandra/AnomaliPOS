@@ -46,14 +46,14 @@ class MenuItemController extends Controller
             'cost_of_goods' => 'nullable|numeric|min:0',
             'sku'           => 'nullable|string|max:100',
             'is_available'  => 'nullable|boolean',
-            'image'         => 'nullable|image|max:2048',
+            'image'         => 'nullable|string',
         ]);
 
 
-        $imageUrl = null;
-        if ($request->hasFile('image')) {
-            $imageUrl = $request->file('image')->store('menu-items', 'public');
-        }
+        $imageUrl = $validated['image'];
+        // if ($request->hasFile('image')) {
+        //     $imageUrl = $request->file('image')->store('menu-items', 'public');
+        // }
 
         MenuItem::create([
             ...$validated,
@@ -66,15 +66,15 @@ class MenuItemController extends Controller
 
     public function edit(string $id): View
     {
-
-        $item = MenuItem::query()->where('id', $id)
+        $menuItemId = $id;
+        $initialData = MenuItem::query()->where('id', $id)
             ->firstOrFail();
 
         $categories = MenuCategory::query()->select('*')
             ->orderBy('sort_order')
             ->get();
 
-        return view('menu.items.create', compact('item', 'categories'));
+        return view('menu.items.create', compact('initialData', 'categories', 'menuItemId'));
     }
 
     public function update(Request $request, string $id): RedirectResponse
@@ -91,17 +91,10 @@ class MenuItemController extends Controller
             'cost_of_goods' => 'nullable|numeric|min:0',
             'sku'           => 'nullable|string|max:100',
             'is_available'  => 'nullable|boolean',
-            'image'         => 'nullable|image|max:2048',
+            'image'         => 'nullable|string',
         ]);
 
-        $imageUrl = $item->image_url;
-        if ($request->hasFile('image')) {
-            // Hapus gambar lama
-            if ($imageUrl) {
-                Storage::disk('public')->delete($imageUrl);
-            }
-            $imageUrl = $request->file('image')->store('menu-items', 'public');
-        }
+        $imageUrl = $validated['image'];
 
         $item->update([
             ...$validated,

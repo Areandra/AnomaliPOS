@@ -44,7 +44,7 @@
                             class="flex items-center gap-3 rounded-[1.5rem] border border-rose-100 bg-rose-50 px-6 py-4 text-xs font-black uppercase tracking-widest text-rose-600 transition-all hover:bg-rose-600 hover:text-white dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-500">
                             <i data-lucide="lock" class="h-5 w-5 text-amber-500"></i> Change Password
                         </button>
-                        <form action="#" method="POST">
+                        <form action="/sign-out" method="POST">
                             <button
                                 class="flex items-center gap-3 rounded-[1.5rem] border border-rose-100 bg-rose-50 px-6 py-4 text-xs font-black uppercase tracking-widest text-rose-600 transition-all hover:bg-rose-600 hover:text-white dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-500">
                                 <i data-lucide="log-out" class="w-4.5 h-4.5"></i> Sign Out

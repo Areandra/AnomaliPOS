@@ -9,7 +9,7 @@
                     'categoryId' => $i->category_id,
                     'price' => (float) $i->price,
                     'sku' => $i->sku,
-                    'imageUrl' => $i->image_url ? asset('storage/' . $i->image_url) : null,
+                    'imageUrl' => $i->image_url,
                     'isAvailable' => (bool) $i->is_available,
                 ],
             )->values(),

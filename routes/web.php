@@ -152,7 +152,12 @@ Route::prefix('request-change-password')->group(function () {
 
 Route::get('/change-password', [AuthController::class, 'showChangePassword'])->name('change-password');
 
-Route::middleware(['auth', 'auth.restaurant', 'tenant.context'])->group(function () {
+Route::middleware([
+    'auth',
+    'auth.restaurant',
+    'tenant.context',
+    'trusted.device'
+])->group(function () {
 
     Route::get('/', function () {
         return response()->redirectTo('/dashboard');
