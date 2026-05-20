@@ -75,11 +75,23 @@ export default function DragLayout({
         if (!mapElement) return;
 
         try {
+            // 1. Dapatkan dimensi keseluruhan konten (termasuk yang disembunyikan scroll)
+            const fullWidth = mapElement.scrollWidth;
+            const fullHeight = mapElement.scrollHeight;
+
             const dataUrl = await toPng(mapElement, {
                 quality: 1,
-                pixelRatio: 2,
+                pixelRatio: 1.5,
                 backgroundColor: isDark ? "#020617" : "#ffffff",
                 cacheBust: true,
+                width: fullWidth,
+                height: fullHeight,
+                style: {
+                    width: `${fullWidth}px`,
+                    height: `${fullHeight}px`,
+                    overflow: "visible",
+                    transform: "translate(0, 0)",
+                },
             });
 
             const link = document.createElement("a");
@@ -88,6 +100,7 @@ export default function DragLayout({
             link.click();
         } catch (error) {
             console.error("Error generating image:", error);
+            alert("Gagal mencetak peta meja. Area mungkin terlalu besar.");
         }
     };
 
@@ -551,7 +564,11 @@ export default function DragLayout({
                                 className={`text-white rounded flex flex-col ${drag ? "cursor-grab active:cursor-grabbing" : ""}`}
                             >
                                 <TableComponent
-                                    session={currentTable.status == "occupied" ? true : false}
+                                    session={
+                                        currentTable.status == "occupied"
+                                            ? true
+                                            : false
+                                    }
                                     vertical={currentTable.vertical}
                                     berhadapan={currentTable.facing}
                                     capacity={currentTable.capacity}
